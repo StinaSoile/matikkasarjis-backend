@@ -6,8 +6,6 @@ const router = express.Router();
 
 // To change:
 
-// kun palautetaan avaimen perusteella sivuja, viimeisestä sivusta ei saisi palauttaa answeria.
-
 // näissä routerin kutsuissa tämä "siivetonlepakko" ym pois ja yleistys tilalle. Miten?
 
 // Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.
@@ -33,10 +31,11 @@ router.post("/siivetonlepakko/:page", (req, res) => {
 });
 
 // Palauttaa kys. sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
+// Listan viimeinen, ts se jonka key on annettu, on PageWithNoAnswer.
 router.get("/siivetonlepakko", (req, res) => {
   const key = req.query.key as string | undefined;
   try {
-    const pagesToReturn = comicService.getPagesByKey(
+    const pagesToReturn = comicService.getPagesToReturn(
       key,
       SiivetonLepakkoTypedPages
     );
@@ -70,7 +69,7 @@ router.get("/velhontaloudenhoitaja", (_req, res) => {
 router.get("/siivetonlepakko/:page", (req, res) => {
   const key = req.query.key as string | undefined;
   try {
-    const pagesToReturn = comicService.getPagesByKey(
+    const pagesToReturn = comicService.getPagesToReturn(
       key,
       SiivetonLepakkoTypedPages
     );

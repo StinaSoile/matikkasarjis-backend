@@ -51,7 +51,7 @@ export const SiivetonLepakkoTypedPages: Page[] = [
     pictureName: "lepakko-s7.png",
   },
   {
-    key: "rosvojen salainen kokous",
+    key: "rosvojensalainenkokous",
 
     pictureName: "lepakko-s8.png",
     questionList: [
