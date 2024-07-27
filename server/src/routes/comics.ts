@@ -4,10 +4,6 @@ import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 import comicService from "../services/comicService";
 const router = express.Router();
 
-// To change:
-
-// näissä routerin kutsuissa tämä "siivetonlepakko" ym pois ja yleistys tilalle. Miten?
-
 // Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.
 // palauttaa keyn, joka avaa seuraavat sarjakuvasivut, jos vastaukset ovat oikein.
 // Jos kyseessä on sivu 0 eli etusivu, palauttaa suoraan ensimmäisen tehtäväsivun keyn.
@@ -29,9 +25,26 @@ router.post("/siivetonlepakko/:page", (req, res) => {
     return res.status(400).send(errMsg);
   }
 });
+router.post("/velhontaloudenhoitaja/:page", (req, res) => {
+  try {
+    const key = comicService.returnKeyByAnswer(
+      req.body,
+      req.params.page,
+      VelhonTaloudenhoitajaTypedPages
+    );
+    return res.json(key);
+  } catch (error: unknown) {
+    let errMsg = "Something went wrong.";
+
+    if (error instanceof Error) {
+      errMsg = error.message;
+    }
+    return res.status(400).send(errMsg);
+  }
+});
 
 // Palauttaa kys. sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
-// Listan viimeinen, ts se jonka key on annettu, on PageWithNoAnswer.
+// Listan viimeinen, ts se jonka key on annettu, palautetaan ilman tietoja oikeista vastauksista.
 router.get("/siivetonlepakko", (req, res) => {
   const key = req.query.key as string | undefined;
   try {
@@ -51,17 +64,22 @@ router.get("/siivetonlepakko", (req, res) => {
   }
 });
 
-// en tee tästä vielä rajoitettua koska ei ole oikeita vastauksia olemassa
-router.get("/velhontaloudenhoitaja", (_req, res) => {
+router.get("/velhontaloudenhoitaja", (req, res) => {
+  const key = req.query.key as string | undefined;
   try {
-    res.json(VelhonTaloudenhoitajaTypedPages);
+    const pagesToReturn = comicService.getPagesToReturn(
+      key,
+      VelhonTaloudenhoitajaTypedPages
+    );
+
+    return res.json(pagesToReturn);
   } catch (error: unknown) {
     let errMsg = "Something went wrong.";
 
     if (error instanceof Error) {
       errMsg = error.message;
     }
-    res.status(400).send(errMsg);
+    return res.status(400).send(errMsg);
   }
 });
 

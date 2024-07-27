@@ -1,7 +1,5 @@
 import { Page } from "./types";
 
-// Muuttaa unknowin tyypin listaksi stringejä, jos se on mahdollista.
-// Jos ei ole muutettavissa, heittää erroria
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
     throw new Error("not an array");
@@ -56,7 +54,7 @@ export const checkIfRightAnswer = (
 export const findNextKey = (comic: Page[], page: number): string => {
   for (let i = page + 1; i < comic.length; i++) {
     if (comic[i].key) {
-      return comic[i].key as string; ///tämä ei käy vaikka minusta typescript vaan ärsyttää
+      return comic[i].key as string; // tässä on oikaistu typescriptin suhteen, ehkä korjaa myöhemmin
     }
   }
   throw new Error("No keys found");

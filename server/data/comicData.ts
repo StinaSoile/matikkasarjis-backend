@@ -1,7 +1,7 @@
 import { Page } from "../src/types";
 export const SiivetonLepakkoTypedPages: Page[] = [
   {
-    pictureName: "luonnos-etusivu.png",
+    pictureName: "varsinainen-etusivu.png",
   },
   {
     pictureName: "lepakko-s1.png",

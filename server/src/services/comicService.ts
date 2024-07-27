@@ -18,7 +18,7 @@ const getPagesByIndex = (index: number, pageList: Page[]): Page[] => {
 
 const getPagesByKey = (key: string, pageList: Page[]): Page[] => {
   const index = getIndexByKey(key, pageList);
-  return getPagesByIndex(index, pageList); //jos index=-1, tämä palauttaa tyhjän taulukon
+  return getPagesByIndex(index, pageList);
 };
 
 const getOnePage = (page: string, pageList: (Page | PageWithNoAnswer)[]) => {
@@ -30,12 +30,12 @@ const returnKeyByAnswer = (
   pageString: string,
   comic: Page[]
 ): string => {
-  const answers = toStringList(body);
   const page = stringToNumber(pageString);
   let key: string = "";
   if (isFirstPage(page)) {
     key = findNextKey(comic, page);
   } else {
+    const answers = toStringList(body);
     if (checkIfRightAnswer(comic, page, answers))
       key = findNextKey(comic, page);
     else key = findCurrentKey(comic, page);
