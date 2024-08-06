@@ -23,14 +23,14 @@ const isString = (text: unknown): text is string => {
 
 const parseString = (string: unknown): string => {
   if (!string || !isString(string)) {
-    throw new Error("Can parse to string");
+    throw new Error("Not able to parse to string");
   }
 
   return string;
 };
 
-const returnPageByIndex = (page: number, comic: Page[]) => {
-  if (page < comic.length) return comic[page];
+export const returnPageByIndex = (page: number, comic: Page[]) => {
+  if (-1 < page && page < comic.length) return comic[page];
   throw new Error("Page does not exist");
 };
 
