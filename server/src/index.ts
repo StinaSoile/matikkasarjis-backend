@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Application } from "express";
 import path from "path";
 import fs from "fs";
 import imageRouter from "./routes/images";
@@ -6,7 +6,7 @@ import comicRouter from "./routes/comics";
 
 import cors from "cors";
 
-const app = express();
+export const app: Application = express();
 app.use(express.json());
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 app.use(cors());
@@ -37,6 +37,6 @@ app.get("/api/imagelist", (_req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

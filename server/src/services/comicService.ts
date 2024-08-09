@@ -13,16 +13,22 @@ const getIndexByKey = (key: string, pageList: Page[]): number => {
 };
 
 const getPagesByIndex = (index: number, pageList: Page[]): Page[] => {
-  return pageList.slice(0, index + 1);
+  if (-1 < index && index < pageList.length)
+    return pageList.slice(0, index + 1);
+  throw new Error("Index out of bounds");
 };
 
 const getPagesByKey = (key: string, pageList: Page[]): Page[] => {
   const index = getIndexByKey(key, pageList);
-  return getPagesByIndex(index, pageList);
+  if (-1 < index) return getPagesByIndex(index, pageList);
+  throw new Error("There is no page with this key");
 };
 
 const getOnePage = (page: string, pageList: (Page | PageWithNoAnswer)[]) => {
-  return pageList[stringToNumber(page)];
+  const pagenumber = stringToNumber(page);
+  if (-1 < pagenumber && pagenumber < pageList.length)
+    return pageList[pagenumber];
+  throw new Error("Index out of bounds");
 };
 
 const returnKeyByAnswer = (
@@ -53,15 +59,16 @@ const changeLastPage = (pagesToReturn: Page[]): (Page | PageWithNoAnswer)[] => {
         { question: lastPage.questionList[i].question },
       ];
     }
+    const lastPageWithoutAnswer: PageWithNoAnswer = {
+      key: lastPage.key,
+      pictureName: lastPage.pictureName,
+      questionList: newQuestionList,
+    };
+    const newPages: (Page | PageWithNoAnswer)[] = [...pagesToReturn];
+    newPages[newPages.length - 1] = lastPageWithoutAnswer;
+    return newPages;
   }
-  const lastPageWithoutAnswer: PageWithNoAnswer = {
-    key: lastPage.key,
-    pictureName: lastPage.pictureName,
-    questionList: newQuestionList,
-  };
-  const newPages: (Page | PageWithNoAnswer)[] = [...pagesToReturn];
-  newPages[newPages.length - 1] = lastPageWithoutAnswer;
-  return newPages;
+  return pagesToReturn;
 };
 
 const getPagesToReturn = (
@@ -72,15 +79,18 @@ const getPagesToReturn = (
     throw new Error("Key is required");
   }
   const pagesToReturn = getPagesByKey(key, comic);
-  if (pagesToReturn.length === 0) {
-    throw new Error("There is no page with this key");
-  }
+
   const newPages = changeLastPage(pagesToReturn);
 
   return newPages;
 };
 
 export default {
+  getIndexByKey,
+  getPagesByIndex,
+  getPagesByKey,
+  changeLastPage,
+
   getOnePage,
   returnKeyByAnswer,
   getPagesToReturn,
