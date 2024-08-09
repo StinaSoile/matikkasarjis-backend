@@ -70,22 +70,22 @@ const ComicWithPageWithNoAnswers: (PageWithNoAnswer | Page)[] = [
   },
 ];
 test.describe("testing getIndexByKey", () => {
-  test("key valid, page exists, returns index", () => {
+  test("should return index if key is valid and page exists", () => {
     const result = comicService.getIndexByKey("key3", SomeComic);
     assert.strictEqual(result, 5);
   });
-  test("key invalid, hence page does not exist, returns -1", () => {
+  test("should return -1 if key is invalid", () => {
     const result = comicService.getIndexByKey("invalidkey", SomeComic);
     assert.strictEqual(result, -1);
   });
-  test("no pages, returns -1", () => {
+  test("should return -1 if comic is empty array", () => {
     const result = comicService.getIndexByKey("key3", []);
     assert.strictEqual(result, -1);
   });
 });
 
 test.describe("testing getPagesByIndex", () => {
-  test("index inside of bounds, comic exists, returns array of pages", () => {
+  test("should return array of pages if page number is inside of bounds", () => {
     const result = comicService.getPagesByIndex(1, SomeComic);
     assert.deepEqual(result, [
       {
@@ -97,7 +97,7 @@ test.describe("testing getPagesByIndex", () => {
     ]);
   });
 
-  test("index too big, throws specific error", () => {
+  test("should throw error if index is too big", () => {
     const result = () => comicService.getPagesByIndex(19, SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Index out of bounds");
@@ -105,7 +105,7 @@ test.describe("testing getPagesByIndex", () => {
     });
   });
 
-  test("index negative, throws specific error", () => {
+  test("should throw error if index is negative", () => {
     const result = () => comicService.getPagesByIndex(-6, SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Index out of bounds");
@@ -115,7 +115,7 @@ test.describe("testing getPagesByIndex", () => {
 });
 
 test.describe("testing getPagesByKey", () => {
-  test("valid key, returns pages from 0 to page with that key", () => {
+  test("should return pages from 0 to page with the given key", () => {
     const result = comicService.getPagesByKey("key1", SomeComic);
     assert.deepEqual(result, [
       {
@@ -137,26 +137,26 @@ test.describe("testing getPagesByKey", () => {
     ]);
   });
 
-  test("invalid key, throws error ", () => {
+  test("should throw error if key is invalid ", () => {
     const result = () => comicService.getPagesByKey("invalidkey", SomeComic);
     assert.throws(result, Error);
   });
 
-  test("invalid comic, throws error", () => {
+  test("should throw error if comic is empty array", () => {
     const result = () => comicService.getPagesByKey("key1", []);
     assert.throws(result, Error);
   });
 });
 
 test.describe("testing getOnePage", () => {
-  test("pagenumber ok, comic ok, returns page", () => {
+  test("should return page if pagenumber and comic ok", () => {
     const result = comicService.getOnePage("1", SomeComic);
     assert.deepEqual(result, {
       pictureName: "s1.png",
     });
   });
 
-  test("if page is a PageWithNoAnswer, returns normally", () => {
+  test("should return page normally even if it is a PageWithNoAnswer", () => {
     const result = comicService.getOnePage("4", ComicWithPageWithNoAnswers);
     assert.deepEqual(result, {
       key: "key2",
@@ -168,14 +168,14 @@ test.describe("testing getOnePage", () => {
       ],
     });
   });
-  test("pagenumber negative, throws specific error", () => {
+  test("should throw error when pagenumber negative", () => {
     const result = () => comicService.getOnePage("-1", SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Index out of bounds");
       return true;
     });
   });
-  test("pagenumber too big, throws specific error", () => {
+  test("should throw error when pagenumber too big", () => {
     const result = () => comicService.getOnePage("41", SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Index out of bounds");
@@ -185,34 +185,34 @@ test.describe("testing getOnePage", () => {
 });
 
 test.describe("testing returnKeyByAnswer", () => {
-  test("valid body, right answer, page and comic ok, returns key", () => {
+  test("should return key if valid body, right answer, page and comic ok", () => {
     const body = ["kyllä"];
     const result = comicService.returnKeyByAnswer(body, "2", SomeComic);
     assert.deepEqual(result, "key2");
   });
-  test("valid body, wrong answer, page and comic ok, returns current key", () => {
+  test("should return current key if body has a wrong answer", () => {
     const body = ["väärä vastaus"];
     const result = comicService.returnKeyByAnswer(body, "2", SomeComic);
     assert.deepEqual(result, "key1");
   });
 
-  test("valid body, wrong amount of (right) answers, page and comic ok: returns current key", () => {
+  test("should return current key if body has wrong amount of (right) answers", () => {
     const body = ["kyllä", "kyllä"];
     const result = comicService.returnKeyByAnswer(body, "2", SomeComic);
     assert.deepEqual(result, "key1");
   });
 
-  test("invalid body, page and comic ok: throws error", () => {
+  test("should throw error if body is not string[]", () => {
     const body = "kyllä";
     const result = () => comicService.returnKeyByAnswer(body, "2", SomeComic);
     assert.throws(result, Error);
   });
-  test("valid body, page ok, comic empty: throws error", () => {
+  test("should throw error if comic is empty array", () => {
     const body = ["kyllä"];
     const result = () => comicService.returnKeyByAnswer(body, "2", []);
     assert.throws(result, Error);
   });
-  test("valid body, comic ok, page out of bounds: throws error", () => {
+  test("should throw error if page index out of bounds", () => {
     const body = ["kyllä"];
     const result = () => comicService.returnKeyByAnswer(body, "32", SomeComic);
     assert.throws(result, Error);
@@ -220,24 +220,24 @@ test.describe("testing returnKeyByAnswer", () => {
 });
 
 test.describe("testing changeLastPage", () => {
-  test("last page of comic has a questionlist: returns comic with changed last page", () => {
+  test("should return comic with changed last page if last page of comic has a questionlist", () => {
     const result = comicService.changeLastPage(
       SomeComic.slice(0, SomeComic.length - 1)
     );
     assert.deepEqual(result, ComicWithPageWithNoAnswers);
   });
-  test("no questionlist in the last page: returns original comic", () => {
+  test("should return comic without change if there is no questionlist in the last page", () => {
     const result = comicService.changeLastPage(SomeComic);
     assert.deepEqual(result, SomeComic);
   });
-  test("empty array as comic: returns original comic", () => {
+  test("should return original comic if comic is empty array", () => {
     const result = () => comicService.changeLastPage([]);
     assert.throws(result, Error);
   });
 });
 
 test.describe("testing getPagesToReturn", () => {
-  test("right key, right comic, returns pages until that key, the last one changed", () => {
+  test("should return pages until given key, the last page changed", () => {
     const result = comicService.getPagesToReturn("key1", SomeComic);
     assert.deepEqual(result, [
       {
@@ -258,15 +258,15 @@ test.describe("testing getPagesToReturn", () => {
     ]);
   });
 
-  test("wrong key, throws specific error", () => {
-    const result = () => comicService.getPagesToReturn("key123", SomeComic);
+  test("should throw specific error if key is wrong", () => {
+    const result = () => comicService.getPagesToReturn("wrongkey", SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "There is no page with this key");
       return true;
     });
   });
 
-  test("no key, throws specific error", () => {
+  test("should throw error if key is not given", () => {
     const result = () => comicService.getPagesToReturn(undefined, SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Key is required");

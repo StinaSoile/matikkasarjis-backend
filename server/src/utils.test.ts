@@ -49,7 +49,7 @@ const SomeComic: Page[] = [
 ];
 
 test.describe("testing toStringList-function, implicitly parseString and isString", () => {
-  test("toStringList, when not array", () => {
+  test("should return error when not given an array", () => {
     const result = () => toStringList("");
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Not an array");
@@ -57,7 +57,7 @@ test.describe("testing toStringList-function, implicitly parseString and isStrin
     });
   });
 
-  test("toStringList, when not strings in array", () => {
+  test("should return error when array includes something else than strings", () => {
     const result = () => toStringList([null, true, "lkj"]);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Not able to parse to string");
@@ -65,7 +65,7 @@ test.describe("testing toStringList-function, implicitly parseString and isStrin
     });
   });
 
-  test("toStringList, when string array", () => {
+  test("should return same array of strings as the array given as parameter", () => {
     const a = ["string1", "string2"];
     const result = toStringList(a);
 
@@ -73,14 +73,14 @@ test.describe("testing toStringList-function, implicitly parseString and isStrin
   });
 });
 test.describe("testing stringToNumber", () => {
-  test("string to number when possible", () => {
+  test("should return number when given string that is convertable to number", () => {
     const a = "23";
     const result = stringToNumber(a);
 
     assert.strictEqual(Number(a), result);
   });
 
-  test("string not number, should throw error", () => {
+  test("should throw error when string cant be changed to number", () => {
     const a = "23g";
     const result = () => stringToNumber(a);
 
@@ -92,13 +92,13 @@ test.describe("testing stringToNumber", () => {
 });
 
 test.describe("testing returnPageByIndex", () => {
-  test("when comic is ok and page exists, return page", () => {
+  test("should return page, given comic (Page[]) and index", () => {
     const result = returnPageByIndex(2, SomeComic);
 
     assert.deepEqual(SomeComic[2], result);
   });
 
-  test("if comic is empty array, should throw error", () => {
+  test("should throw error if comic is empty array", () => {
     const result = () => returnPageByIndex(4, []);
 
     assert.throws(result, (err: Error) => {
@@ -107,7 +107,7 @@ test.describe("testing returnPageByIndex", () => {
     });
   });
 
-  test("if comic is ok but pagenumber too big, should throw error", () => {
+  test("should throw error when index is too big", () => {
     const result = () => returnPageByIndex(40, SomeComic);
 
     assert.throws(result, (err: Error) => {
@@ -115,7 +115,7 @@ test.describe("testing returnPageByIndex", () => {
       return true;
     });
   });
-  test("if comic is ok but pagenumber negative, should throw error", () => {
+  test("should throw error when index is negative", () => {
     const result = () => returnPageByIndex(-2, SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Page does not exist");
@@ -125,12 +125,12 @@ test.describe("testing returnPageByIndex", () => {
 });
 
 test.describe("testing checkIfRightAnswer", () => {
-  test("If page ok, pagenumber ok and answer right, returns true", () => {
+  test("should return true when answer right", () => {
     const result = checkIfRightAnswer(SomeComic, 2, ["kyllä"]);
     assert.strictEqual(result, true);
   });
 
-  test("If page ok, pagenumber ok and answer wrong, returns false", () => {
+  test("should return false when answer false", () => {
     const result = checkIfRightAnswer(SomeComic, 2, ["juu", "ei"]);
     assert.strictEqual(result, false);
 
@@ -138,7 +138,7 @@ test.describe("testing checkIfRightAnswer", () => {
     assert.strictEqual(result2, false);
   });
 
-  test("if page does not exist (pagenumber too big), throws error from returnPageByIndex", () => {
+  test("should throw error if pagenumber too big", () => {
     const result = () => checkIfRightAnswer(SomeComic, 20, ["juu"]);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Page does not exist");
@@ -148,12 +148,12 @@ test.describe("testing checkIfRightAnswer", () => {
 });
 
 test.describe("testing findNextKey", () => {
-  test("comic and pagenumber ok, key found", () => {
+  test("should return next key if comic and pagenumber valid", () => {
     const result = findNextKey(SomeComic, 2);
     assert.deepEqual(result, "key2");
   });
 
-  test("pagenumber too big to find key but valid page, specific error", () => {
+  test("should throw error if pagenumber in bounds but too big to find key", () => {
     const result = () => findNextKey(SomeComic, 5);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "No keys found");
@@ -161,12 +161,12 @@ test.describe("testing findNextKey", () => {
     });
   });
 
-  test("pagenumber invalid, error", () => {
+  test("should throw error if pagenumber out of bounds", () => {
     const result = () => findNextKey(SomeComic, -2);
     assert.throws(result, Error);
   });
 
-  test("comic empty, specific error", () => {
+  test("should throw error if comic empty", () => {
     const result = () => findNextKey([], 2);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "No keys found");
@@ -176,12 +176,12 @@ test.describe("testing findNextKey", () => {
 });
 
 test.describe("testing findCurrentKey", () => {
-  test("comic and pagenumber ok, key found", () => {
+  test("should return key in given page if comic and pagenumber ok", () => {
     const result = findCurrentKey(SomeComic, 2);
     assert.deepEqual(result, "key1");
   });
 
-  test("no key in given page, throws specific error", () => {
+  test("should throw specific error if given page has no key", () => {
     const result = () => findCurrentKey(SomeComic, 1);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "No current key found");
@@ -189,23 +189,23 @@ test.describe("testing findCurrentKey", () => {
     });
   });
 
-  test("pagenumber too big, error", () => {
+  test("should throw error if pagenumber too big", () => {
     const result = () => findCurrentKey(SomeComic, 8);
     assert.throws(result, Error);
   });
 
-  test("comic empty, error", () => {
+  test("should throw error if comic is empty array", () => {
     const result = () => findCurrentKey([], 2);
     assert.throws(result, Error);
   });
 });
 test.describe("testing isFirstPage", () => {
-  test("not first page, return false", () => {
+  test("should return false if given pagenumber is not 0", () => {
     const result = isFirstPage(2);
     assert.strictEqual(result, false);
   });
 
-  test("first page, return true", () => {
+  test("should return true if given pagenumber 0", () => {
     const result = isFirstPage(0);
     assert.strictEqual(result, true);
   });

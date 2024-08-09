@@ -2,11 +2,11 @@ import supertest from "supertest";
 import test, { after } from "node:test";
 import { app, server } from "../index";
 import assert from "node:assert";
-import { Page, } from "../types";
+import { Page } from "../types";
 
 const api = supertest(app);
 
-test.describe("testing get(`api/comics/siivetonlepakko`), that gives comicpages when given key in query", () => {
+test.describe("testing get(`api/comics/siivetonlepakko`)", () => {
   test("comic pages are returned as json", async () => {
     await api
       .get("/api/comics/siivetonlepakko?key=eka")
@@ -14,7 +14,7 @@ test.describe("testing get(`api/comics/siivetonlepakko`), that gives comicpages 
       .expect("Content-Type", /application\/json/);
   });
 
-  test("result is (Page | PageWithNoAnswers)[]", async () => {
+  test("should return list of pages until page with given key", async () => {
     const result = await api.get("/api/comics/siivetonlepakko?key=eka");
 
     assert.deepEqual(result.body, [
@@ -36,7 +36,7 @@ test.describe("testing get(`api/comics/siivetonlepakko`), that gives comicpages 
     ]);
   });
 
-  test("key of last page is the same key as in query", async () => {
+  test("should have same key in the last page as the query parameter", async () => {
     const result = await api.get("/api/comics/siivetonlepakko?key=eka");
     const lastIndex = result.body.length - 1;
     const returnedKey = result.body[lastIndex].key as string | undefined;
@@ -48,19 +48,17 @@ test.describe("testing get(`api/comics/siivetonlepakko`), that gives comicpages 
     assert.deepEqual(returnedKey2, "1332");
   });
 
-  test("last page questionList should be without answers", async () => {
+  test("should not have answers in the questionList of the last page", async () => {
     const result = await api.get("/api/comics/siivetonlepakko?key=eka");
     const lastItem = result.body[result.body.length - 1] as Page;
     if (lastItem.questionList) {
-      lastItem.questionList.forEach(
-        (question) => {
-          assert.strictEqual(question["answer"], undefined);
-        }
-      );
+      lastItem.questionList.forEach((question) => {
+        assert.strictEqual(question["answer"], undefined);
+      });
     }
   });
 
-  test("error if key is wrong", async () => {
+  test("should throw error if key is wrong", async () => {
     const result = await api
       .get("/api/comics/siivetonlepakko?key=huonoavain")
       .expect(400);
@@ -68,15 +66,15 @@ test.describe("testing get(`api/comics/siivetonlepakko`), that gives comicpages 
     assert.strictEqual(result.text, "There is no page with this key");
   });
 
-  test("error if no key", async () => {
+  test("should throw error if key is not given as query parameter", async () => {
     const result = await api.get("/api/comics/siivetonlepakko").expect(400);
 
     assert.strictEqual(result.text, "Key is required");
   });
 });
 
-test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key if body has right answer", () => {
-  test("right answer, gives next key", async () => {
+test.describe("testing post(`api/comics/siivetonlepakko/:page`)", () => {
+  test("should return next key if answer in the body is right", async () => {
     const result = await api
       .post("/api/comics/siivetonlepakko/4")
       .send(["13", "32"])
@@ -85,7 +83,7 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key 
     assert.deepEqual(result.body, "1332");
   });
 
-  test("wrong answer, gives current key", async () => {
+  test("should return current key if answer is wrong", async () => {
     const result = await api
       .post("/api/comics/siivetonlepakko/4")
       .send(["13", "42"])
@@ -94,7 +92,7 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key 
     assert.deepEqual(result.body, "key124");
   });
 
-  test("no answer, throws specific error with status 400", async () => {
+  test("should throw error with status 400 if body does not exist", async () => {
     const response = await api
       .post("/api/comics/siivetonlepakko/4")
       .expect(400);
@@ -102,13 +100,13 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key 
     assert.deepEqual(response.text, "Not an array");
   });
 
-  test("no answer but first page, gives first key", async () => {
+  test("should return first key if there is no body but address has a first page /0", async () => {
     const result = await api.post("/api/comics/siivetonlepakko/0").expect(200);
 
     assert.deepEqual(result.body, "eka");
   });
 
-  test("wrong answer but first page, gives first key", async () => {
+  test("should return first key if answer is wrong but address has a first page /0", async () => {
     const result = await api
       .post("/api/comics/siivetonlepakko/0")
       .send(["13", "32"])
@@ -117,7 +115,7 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key 
     assert.deepEqual(result.body, "eka");
   });
 
-  test("page does not exist, throws error", async () => {
+  test("should throw error if page in address does not exist", async () => {
     await api
       .post("/api/comics/siivetonlepakko/50")
       .send(["13", "32"])
@@ -126,7 +124,7 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`), that gives key 
 });
 
 test.describe("testing get(`api/comics/siivetonlepakko/:page`)", () => {
-  test("result is right page and type Page | PageWithNoResults", async () => {
+  test("should return right page", async () => {
     const result = await api
       .get("/api/comics/siivetonlepakko/2?key=eka")
       .expect(200);
@@ -142,13 +140,13 @@ test.describe("testing get(`api/comics/siivetonlepakko/:page`)", () => {
     });
   });
 
-  test("if no key, throws specific error", async () => {
+  test("should throw error if key is not given in query", async () => {
     const result = await api.get("/api/comics/siivetonlepakko/2").expect(400);
 
     assert.strictEqual(result.text, "Key is required");
   });
 
-  test("if key is for earlier pages, throws specific error", async () => {
+  test("should throw error if key is for earlier pages", async () => {
     const result = await api
       .get("/api/comics/siivetonlepakko/5?key=eka")
       .expect(400);
