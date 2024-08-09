@@ -2,7 +2,7 @@ import { Page } from "./types";
 
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
-    throw new Error("not an array");
+    throw new Error("Not an array");
   }
   const newObj: string[] = [];
   for (let i = 0; i < obj.length; i++) {

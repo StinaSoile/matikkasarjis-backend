@@ -51,7 +51,10 @@ const SomeComic: Page[] = [
 test.describe("testing toStringList-function, implicitly parseString and isString", () => {
   test("toStringList, when not array", () => {
     const result = () => toStringList("");
-    assert.throws(result, Error);
+    assert.throws(result, (err: Error) => {
+      assert.strictEqual(err.message, "Not an array");
+      return true;
+    });
   });
 
   test("toStringList, when not strings in array", () => {
