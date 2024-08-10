@@ -1,6 +1,6 @@
 import supertest from "supertest";
-import test, { after } from "node:test";
-import { app, server } from "../index";
+import test from "node:test";
+import { app } from "../app";
 import assert from "node:assert";
 import { Page } from "../types";
 
@@ -152,11 +152,5 @@ test.describe("testing get(`api/comics/siivetonlepakko/:page`)", () => {
       .expect(400);
 
     assert.strictEqual(result.text, "Index out of bounds");
-  });
-});
-
-after(() => {
-  server.close(() => {
-    console.log("Server closed");
   });
 });
