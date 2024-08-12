@@ -5,6 +5,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
+    "c8": "^10.1.2",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "supertest": "^7.0.0",
@@ -17,7 +18,7 @@
     "dev": "ts-node-dev server/src/index.ts",
     "lint": "eslint --ext .ts .",
     "start": "node build/src/index.js",
-    "test": "node --import tsx --test server/**/*.test.ts server/**/**/*.test.ts"
+    "test": "c8 node --import tsx --test server/**/*.test.ts server/**/**/*.test.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

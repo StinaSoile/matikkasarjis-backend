@@ -145,6 +145,14 @@ test.describe("testing checkIfRightAnswer", () => {
       return true;
     });
   });
+
+  test("should throw error if comic is empty array", () => {
+    const result = () => checkIfRightAnswer([], 2, ["juu", "ei"]);
+    assert.throws(result, (err: Error) => {
+      assert.strictEqual(err.message, "Page does not exist");
+      return true;
+    });
+  });
 });
 
 test.describe("testing findNextKey", () => {
