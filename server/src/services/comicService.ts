@@ -1,4 +1,5 @@
-import { Page, PageWithNoAnswer, QuestionWithNoAnswer } from "../types";
+import { Comic, Page, PageWithNoAnswer, QuestionWithNoAnswer } from "../types";
+import { Comics } from "../../data/allComics";
 import {
   stringToNumber,
   toStringList,
@@ -85,6 +86,12 @@ const getPagesToReturn = (
   return newPages;
 };
 
+const getComic = (name: string): Comic => {
+  const comic = Comics.find((comic) => comic.comicName === name);
+  if (comic) return comic;
+  throw new Error("Comic does not exist");
+};
+
 export default {
   getIndexByKey,
   getPagesByIndex,
@@ -94,4 +101,5 @@ export default {
   getOnePage,
   returnKeyByAnswer,
   getPagesToReturn,
+  getComic,
 };

@@ -1,6 +1,4 @@
 import express from "express";
-import { SiivetonLepakkoTypedPages } from "../../data/comicData";
-import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 import comicService from "../services/comicService";
 const router = express.Router();
 
@@ -8,29 +6,14 @@ const router = express.Router();
 // palauttaa keyn, joka avaa seuraavat sarjakuvasivut, jos vastaukset ovat oikein.
 // Jos kyseessä on sivu 0 eli etusivu, palauttaa suoraan ensimmäisen tehtäväsivun keyn.
 // Jos vastaus on väärä, palauttaa keyn, joka vastaa sivua, jonka kysymyksiin tässä yritetään vastata.
-router.post("/siivetonlepakko/:page", (req, res) => {
-  try {
-    const key = comicService.returnKeyByAnswer(
-      req.body,
-      req.params.page,
-      SiivetonLepakkoTypedPages
-    );
-    return res.json(key);
-  } catch (error: unknown) {
-    let errMsg = "Something went wrong.";
+router.post("/:comicName/:page", (req, res) => {
+  const comic = comicService.getComic(req.params.comicName);
 
-    if (error instanceof Error) {
-      errMsg = error.message;
-    }
-    return res.status(400).send(errMsg);
-  }
-});
-router.post("/velhontaloudenhoitaja/:page", (req, res) => {
   try {
     const key = comicService.returnKeyByAnswer(
       req.body,
       req.params.page,
-      VelhonTaloudenhoitajaTypedPages
+      comic.comicpages
     );
     return res.json(key);
   } catch (error: unknown) {
@@ -43,34 +26,14 @@ router.post("/velhontaloudenhoitaja/:page", (req, res) => {
   }
 });
 
-// Palauttaa kys. sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
+// Palauttaa sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
 // Listan viimeinen, ts se jonka key on annettu, palautetaan ilman tietoja oikeista vastauksista.
-router.get("/siivetonlepakko", (req, res) => {
+router.get("/:comicName", (req, res) => {
+  const comic = comicService.getComic(req.params.comicName);
+
   const key = req.query.key as string | undefined;
   try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      SiivetonLepakkoTypedPages
-    );
-
-    return res.json(pagesToReturn);
-  } catch (error: unknown) {
-    let errMsg = "Something went wrong.";
-
-    if (error instanceof Error) {
-      errMsg = error.message;
-    }
-    return res.status(400).send(errMsg);
-  }
-});
-
-router.get("/velhontaloudenhoitaja", (req, res) => {
-  const key = req.query.key as string | undefined;
-  try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      VelhonTaloudenhoitajaTypedPages
-    );
+    const pagesToReturn = comicService.getPagesToReturn(key, comic.comicpages);
 
     return res.json(pagesToReturn);
   } catch (error: unknown) {
@@ -84,30 +47,13 @@ router.get("/velhontaloudenhoitaja", (req, res) => {
 });
 
 // yksittäiset sivut kysymyksineen ja vastauksineen, rajoitettu keyn perusteella
-router.get("/siivetonlepakko/:page", (req, res) => {
+router.get("/:comicName/:page", (req, res) => {
+  const comic = comicService.getComic(req.params.comicName);
+
   const key = req.query.key as string | undefined;
   try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      SiivetonLepakkoTypedPages
-    );
+    const pagesToReturn = comicService.getPagesToReturn(key, comic.comicpages);
     return res.json(comicService.getOnePage(req.params.page, pagesToReturn));
-  } catch (error: unknown) {
-    let errMsg = "Something went wrong.";
-
-    if (error instanceof Error) {
-      errMsg = error.message;
-    }
-    return res.status(400).send(errMsg);
-  }
-});
-
-// yksittäiset sivut kysymyksineen ja vastauksineen, ei rajoitettu
-router.get("/velhontaloudenhoitaja/:page", (req, res) => {
-  try {
-    return res.json(
-      comicService.getOnePage(req.params.page, VelhonTaloudenhoitajaTypedPages)
-    );
   } catch (error: unknown) {
     let errMsg = "Something went wrong.";
 
