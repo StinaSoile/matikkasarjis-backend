@@ -3,6 +3,7 @@ import test from "node:test";
 import comicService from "./comicService";
 
 import { Page, PageWithNoAnswer } from "../types";
+import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 
 const SomeComic: Page[] = [
   {
@@ -270,6 +271,29 @@ test.describe("testing getPagesToReturn", () => {
     const result = () => comicService.getPagesToReturn(undefined, SomeComic);
     assert.throws(result, (err: Error) => {
       assert.strictEqual(err.message, "Key is required");
+      return true;
+    });
+  });
+});
+
+test.describe("testing getComic", () => {
+  test("should give info of one comic, if comic name exists", () => {
+    const result = comicService.getComic("velhontaloudenhoitaja");
+    assert.deepEqual(result, {
+      comicName: "velhontaloudenhoitaja",
+      alt: "Velhon taloudenhoitaja -sarjakuva",
+      description: {
+        name: "Velhon taloudenhoitaja",
+        level: "8. luokka",
+      },
+      comicpages: VelhonTaloudenhoitajaTypedPages,
+    });
+  });
+
+  test("should throw error if comic does not exist", () => {
+    const result = () => comicService.getComic("eisarjakuva");
+    assert.throws(result, (err: Error) => {
+      assert.strictEqual(err.message, "Comic does not exist");
       return true;
     });
   });

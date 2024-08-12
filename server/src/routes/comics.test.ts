@@ -2,11 +2,12 @@ import supertest from "supertest";
 import test from "node:test";
 import { app } from "../app";
 import assert from "node:assert";
-import { Page } from "../types";
+import { Page, PageWithNoAnswer } from "../types";
+import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 
 const api = supertest(app);
 
-test.describe("testing get(`api/comics/siivetonlepakko`)", () => {
+test.describe("testing get(`api/comics/:comic`)", () => {
   test("comic pages are returned as json", async () => {
     await api
       .get("/api/comics/siivetonlepakko?key=eka")
@@ -34,6 +35,29 @@ test.describe("testing get(`api/comics/siivetonlepakko`)", () => {
         ],
       },
     ]);
+    const result2 = await api.get(
+      "/api/comics/velhontaloudenhoitaja?key=lastpage"
+    );
+
+    const changedPages = [...VelhonTaloudenhoitajaTypedPages] as (
+      | Page
+      | PageWithNoAnswer
+    )[];
+
+    changedPages.splice(changedPages.length - 1, 1, {
+      key: "lastpage",
+
+      pictureName: "velhontaloudenhoitaja-s44.png",
+      questionList: [
+        {
+          question: "question",
+        },
+      ],
+    });
+    assert.deepEqual(
+      JSON.stringify(result2.body, null, 2),
+      JSON.stringify(changedPages, null, 2)
+    );
   });
 
   test("should have same key in the last page as the query parameter", async () => {
@@ -46,6 +70,13 @@ test.describe("testing get(`api/comics/siivetonlepakko`)", () => {
     const lastIndex2 = result2.body.length - 1;
     const returnedKey2 = result2.body[lastIndex2].key as string | undefined;
     assert.deepEqual(returnedKey2, "1332");
+
+    const result3 = await api.get(
+      "/api/comics/velhontaloudenhoitaja?key=lastpage"
+    );
+    const lastIndex3 = result3.body.length - 1;
+    const returnedKey3 = result3.body[lastIndex3].key as string | undefined;
+    assert.deepEqual(returnedKey3, "lastpage");
   });
 
   test("should not have answers in the questionList of the last page", async () => {
@@ -67,13 +98,21 @@ test.describe("testing get(`api/comics/siivetonlepakko`)", () => {
   });
 
   test("should throw error if key is not given as query parameter", async () => {
-    const result = await api.get("/api/comics/siivetonlepakko").expect(400);
+    const result = await api
+      .get("/api/comics/velhontaloudenhoitaja")
+      .expect(400);
 
     assert.strictEqual(result.text, "Key is required");
   });
+
+  test("should throw error if comic does not exist", async () => {
+    const result = await api.get("/api/comics/eisarjakuva?key=eka").expect(404);
+
+    assert.strictEqual(result.text, "Comic does not exist");
+  });
 });
 
-test.describe("testing post(`api/comics/siivetonlepakko/:page`)", () => {
+test.describe("testing post(`api/comics/:comicName/:page`)", () => {
   test("should return next key if answer in the body is right", async () => {
     const result = await api
       .post("/api/comics/siivetonlepakko/4")
@@ -121,9 +160,14 @@ test.describe("testing post(`api/comics/siivetonlepakko/:page`)", () => {
       .send(["13", "32"])
       .expect(400);
   });
+  test("should throw error if comic does not exist", async () => {
+    const result = await api.post("/api/comics/eisarjakuva/0").expect(404);
+
+    assert.strictEqual(result.text, "Comic does not exist");
+  });
 });
 
-test.describe("testing get(`api/comics/siivetonlepakko/:page`)", () => {
+test.describe("testing get(`api/comics/:comicName/:page`)", () => {
   test("should return right page", async () => {
     const result = await api
       .get("/api/comics/siivetonlepakko/2?key=eka")
@@ -152,5 +196,13 @@ test.describe("testing get(`api/comics/siivetonlepakko/:page`)", () => {
       .expect(400);
 
     assert.strictEqual(result.text, "Index out of bounds");
+  });
+
+  test("should throw error if comic does not exist", async () => {
+    const result = await api
+      .get("/api/comics/eisarjakuva/0?key=eka")
+      .expect(404);
+
+    assert.strictEqual(result.text, "Comic does not exist");
   });
 });
