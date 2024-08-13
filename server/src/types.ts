@@ -15,4 +15,13 @@ export interface PageWithNoAnswer {
   questionList?: QuestionWithNoAnswer[];
 }
 
+export interface Comic {
+  shortName: string;
+  name: string;
+  level: string;
+  comicpages: Page[];
+}
+
+export type ComicWithNoPages = Omit<Comic, "comicpages">;
+
 export type QuestionWithNoAnswer = Omit<Question, "answer">;

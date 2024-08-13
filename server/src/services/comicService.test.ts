@@ -3,6 +3,7 @@ import test from "node:test";
 import comicService from "./comicService";
 
 import { Page, PageWithNoAnswer } from "../types";
+import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 
 const SomeComic: Page[] = [
   {
@@ -272,5 +273,43 @@ test.describe("testing getPagesToReturn", () => {
       assert.strictEqual(err.message, "Key is required");
       return true;
     });
+  });
+});
+
+test.describe("testing getComic", () => {
+  test("should give info of one comic, if comic name exists", () => {
+    const result = comicService.getComic("velhontaloudenhoitaja");
+    assert.deepEqual(result, {
+      shortName: "velhontaloudenhoitaja",
+      name: "Velhon taloudenhoitaja",
+      level: "8. luokka",
+      comicpages: VelhonTaloudenhoitajaTypedPages,
+    });
+  });
+
+  test("should throw error if comic does not exist", () => {
+    const result = () => comicService.getComic("eisarjakuva");
+    assert.throws(result, (err: Error) => {
+      assert.strictEqual(err.message, "Comic does not exist");
+      return true;
+    });
+  });
+});
+
+test.describe("testing getAllComics", () => {
+  test("should return list of comics but no pages", () => {
+    const result = comicService.getAllComics();
+    assert.deepEqual(result, [
+      {
+        shortName: "siivetonlepakko",
+        name: "Siivettömän lepakon matka",
+        level: "4. luokka",
+      },
+      {
+        shortName: "velhontaloudenhoitaja",
+        name: "Velhon taloudenhoitaja",
+        level: "8. luokka",
+      },
+    ]);
   });
 });

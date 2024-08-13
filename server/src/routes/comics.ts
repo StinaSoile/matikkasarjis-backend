@@ -1,19 +1,34 @@
 import express from "express";
-import { SiivetonLepakkoTypedPages } from "../../data/comicData";
-import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 import comicService from "../services/comicService";
+import { Comic } from "../types";
 const router = express.Router();
+
+router.get("/", (_req, res) => {
+  const comicList = comicService.getAllComics();
+  return res.json(comicList);
+});
 
 // Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.
 // palauttaa keyn, joka avaa seuraavat sarjakuvasivut, jos vastaukset ovat oikein.
 // Jos kyseessä on sivu 0 eli etusivu, palauttaa suoraan ensimmäisen tehtäväsivun keyn.
 // Jos vastaus on väärä, palauttaa keyn, joka vastaa sivua, jonka kysymyksiin tässä yritetään vastata.
-router.post("/siivetonlepakko/:page", (req, res) => {
+router.post("/:comicName/:page", (req, res) => {
+  let comic: Comic;
+  try {
+    comic = comicService.getComic(req.params.comicName);
+  } catch (error: unknown) {
+    let errMsg = "Something went wrong.";
+
+    if (error instanceof Error) {
+      errMsg = error.message;
+    }
+    return res.status(404).send(errMsg);
+  }
   try {
     const key = comicService.returnKeyByAnswer(
       req.body,
       req.params.page,
-      SiivetonLepakkoTypedPages
+      comic.comicpages
     );
     return res.json(key);
   } catch (error: unknown) {
@@ -25,52 +40,24 @@ router.post("/siivetonlepakko/:page", (req, res) => {
     return res.status(400).send(errMsg);
   }
 });
-router.post("/velhontaloudenhoitaja/:page", (req, res) => {
-  try {
-    const key = comicService.returnKeyByAnswer(
-      req.body,
-      req.params.page,
-      VelhonTaloudenhoitajaTypedPages
-    );
-    return res.json(key);
-  } catch (error: unknown) {
-    let errMsg = "Something went wrong.";
 
-    if (error instanceof Error) {
-      errMsg = error.message;
-    }
-    return res.status(400).send(errMsg);
-  }
-});
-
-// Palauttaa kys. sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
+// Palauttaa sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
 // Listan viimeinen, ts se jonka key on annettu, palautetaan ilman tietoja oikeista vastauksista.
-router.get("/siivetonlepakko", (req, res) => {
-  const key = req.query.key as string | undefined;
+router.get("/:comicName", (req, res) => {
+  let comic: Comic;
   try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      SiivetonLepakkoTypedPages
-    );
-
-    return res.json(pagesToReturn);
+    comic = comicService.getComic(req.params.comicName);
   } catch (error: unknown) {
     let errMsg = "Something went wrong.";
 
     if (error instanceof Error) {
       errMsg = error.message;
     }
-    return res.status(400).send(errMsg);
+    return res.status(404).send(errMsg);
   }
-});
-
-router.get("/velhontaloudenhoitaja", (req, res) => {
   const key = req.query.key as string | undefined;
   try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      VelhonTaloudenhoitajaTypedPages
-    );
+    const pagesToReturn = comicService.getPagesToReturn(key, comic.comicpages);
 
     return res.json(pagesToReturn);
   } catch (error: unknown) {
@@ -84,30 +71,22 @@ router.get("/velhontaloudenhoitaja", (req, res) => {
 });
 
 // yksittäiset sivut kysymyksineen ja vastauksineen, rajoitettu keyn perusteella
-router.get("/siivetonlepakko/:page", (req, res) => {
-  const key = req.query.key as string | undefined;
+router.get("/:comicName/:page", (req, res) => {
+  let comic: Comic;
   try {
-    const pagesToReturn = comicService.getPagesToReturn(
-      key,
-      SiivetonLepakkoTypedPages
-    );
-    return res.json(comicService.getOnePage(req.params.page, pagesToReturn));
+    comic = comicService.getComic(req.params.comicName);
   } catch (error: unknown) {
     let errMsg = "Something went wrong.";
 
     if (error instanceof Error) {
       errMsg = error.message;
     }
-    return res.status(400).send(errMsg);
+    return res.status(404).send(errMsg);
   }
-});
-
-// yksittäiset sivut kysymyksineen ja vastauksineen, ei rajoitettu
-router.get("/velhontaloudenhoitaja/:page", (req, res) => {
+  const key = req.query.key as string | undefined;
   try {
-    return res.json(
-      comicService.getOnePage(req.params.page, VelhonTaloudenhoitajaTypedPages)
-    );
+    const pagesToReturn = comicService.getPagesToReturn(key, comic.comicpages);
+    return res.json(comicService.getOnePage(req.params.page, pagesToReturn));
   } catch (error: unknown) {
     let errMsg = "Something went wrong.";
 
