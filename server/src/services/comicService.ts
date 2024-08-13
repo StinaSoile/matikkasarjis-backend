@@ -93,16 +93,16 @@ const getPagesToReturn = (
 };
 
 const getComic = (name: string): Comic => {
-  const comic = Comics.find((comic) => comic.comicName === name);
+  const comic = Comics.find((comic) => comic.shortName === name);
   if (comic) return comic;
   throw new Error("Comic does not exist");
 };
 
 const getAllComics = (): ComicWithNoPages[] => {
-  return Comics.map(({ comicName, alt, description }) => ({
-    comicName,
-    alt,
-    description,
+  return Comics.map(({ shortName, name, level }) => ({
+    shortName,
+    name,
+    level,
   }));
 };
 

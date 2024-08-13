@@ -16,9 +16,9 @@ export interface PageWithNoAnswer {
 }
 
 export interface Comic {
-  comicName: string;
-  alt: string;
-  description: { name: string; level: string };
+  shortName: string;
+  name: string;
+  level: string;
   comicpages: Page[];
 }
 

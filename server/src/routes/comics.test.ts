@@ -7,7 +7,7 @@ import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 
 const api = supertest(app);
 
-test.describe("testing get(`api/comics/:comic`)", () => {
+test.describe("testing get(`api/comics/:comicName`)", () => {
   test("comic pages are returned as json", async () => {
     await api
       .get("/api/comics/siivetonlepakko?key=eka")
