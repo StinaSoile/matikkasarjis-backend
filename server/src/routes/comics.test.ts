@@ -54,10 +54,7 @@ test.describe("testing get(`api/comics/:comicName`)", () => {
         },
       ],
     });
-    assert.deepEqual(
-      JSON.stringify(result2.body, null, 2),
-      JSON.stringify(changedPages, null, 2)
-    );
+    assert.deepEqual(result2.body, changedPages);
   });
 
   test("should have same key in the last page as the query parameter", async () => {
@@ -213,20 +210,14 @@ test.describe("testing get(`api/comics`)", () => {
 
     assert.deepEqual(result.body, [
       {
-        comicName: "siivetonlepakko",
-        alt: "Siivettömän lepakon matka -sarjakuva",
-        description: {
-          name: "Siivettömän lepakon matka",
-          level: "4. luokka",
-        },
+        shortName: "siivetonlepakko",
+        name: "Siivettömän lepakon matka",
+        level: "4. luokka",
       },
       {
-        comicName: "velhontaloudenhoitaja",
-        alt: "Velhon taloudenhoitaja -sarjakuva",
-        description: {
-          name: "Velhon taloudenhoitaja",
-          level: "8. luokka",
-        },
+        shortName: "velhontaloudenhoitaja",
+        name: "Velhon taloudenhoitaja",
+        level: "8. luokka",
       },
     ]);
   });

@@ -280,12 +280,9 @@ test.describe("testing getComic", () => {
   test("should give info of one comic, if comic name exists", () => {
     const result = comicService.getComic("velhontaloudenhoitaja");
     assert.deepEqual(result, {
-      comicName: "velhontaloudenhoitaja",
-      alt: "Velhon taloudenhoitaja -sarjakuva",
-      description: {
-        name: "Velhon taloudenhoitaja",
-        level: "8. luokka",
-      },
+      shortName: "velhontaloudenhoitaja",
+      name: "Velhon taloudenhoitaja",
+      level: "8. luokka",
       comicpages: VelhonTaloudenhoitajaTypedPages,
     });
   });
@@ -304,20 +301,14 @@ test.describe("testing getAllComics", () => {
     const result = comicService.getAllComics();
     assert.deepEqual(result, [
       {
-        comicName: "siivetonlepakko",
-        alt: "Siivettömän lepakon matka -sarjakuva",
-        description: {
-          name: "Siivettömän lepakon matka",
-          level: "4. luokka",
-        },
+        shortName: "siivetonlepakko",
+        name: "Siivettömän lepakon matka",
+        level: "4. luokka",
       },
       {
-        comicName: "velhontaloudenhoitaja",
-        alt: "Velhon taloudenhoitaja -sarjakuva",
-        description: {
-          name: "Velhon taloudenhoitaja",
-          level: "8. luokka",
-        },
+        shortName: "velhontaloudenhoitaja",
+        name: "Velhon taloudenhoitaja",
+        level: "8. luokka",
       },
     ]);
   });

@@ -19,7 +19,8 @@
     "lint": "eslint --ext .ts .",
     "start": "node build/src/index.js",
     "test": "node --import tsx --test server/**/*.test.ts server/**/**/*.test.ts",
-    "test-coverage": "c8 node --import tsx --test server/**/*.test.ts server/**/**/*.test.ts"
+    "test-coverage": "c8 node --import tsx --test server/**/*.test.ts server/**/**/*.test.ts",
+    "test-only": "node --import tsx --test --test-only server/**/*.test.ts server/**/**/*.test.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
