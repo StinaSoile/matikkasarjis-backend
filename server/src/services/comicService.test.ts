@@ -298,3 +298,27 @@ test.describe("testing getComic", () => {
     });
   });
 });
+
+test.describe("testing getAllComics", () => {
+  test("should return list of comics but no pages", () => {
+    const result = comicService.getAllComics();
+    assert.deepEqual(result, [
+      {
+        comicName: "siivetonlepakko",
+        alt: "Siivettömän lepakon matka -sarjakuva",
+        description: {
+          name: "Siivettömän lepakon matka",
+          level: "4. luokka",
+        },
+      },
+      {
+        comicName: "velhontaloudenhoitaja",
+        alt: "Velhon taloudenhoitaja -sarjakuva",
+        description: {
+          name: "Velhon taloudenhoitaja",
+          level: "8. luokka",
+        },
+      },
+    ]);
+  });
+});

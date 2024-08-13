@@ -206,3 +206,28 @@ test.describe("testing get(`api/comics/:comicName/:page`)", () => {
     assert.strictEqual(result.text, "Comic does not exist");
   });
 });
+
+test.describe("testing get(`api/comics`)", () => {
+  test("should return list of comics without pages", async () => {
+    const result = await api.get("/api/comics").expect(200);
+
+    assert.deepEqual(result.body, [
+      {
+        comicName: "siivetonlepakko",
+        alt: "Siivettömän lepakon matka -sarjakuva",
+        description: {
+          name: "Siivettömän lepakon matka",
+          level: "4. luokka",
+        },
+      },
+      {
+        comicName: "velhontaloudenhoitaja",
+        alt: "Velhon taloudenhoitaja -sarjakuva",
+        description: {
+          name: "Velhon taloudenhoitaja",
+          level: "8. luokka",
+        },
+      },
+    ]);
+  });
+});
