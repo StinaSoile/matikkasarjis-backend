@@ -22,4 +22,6 @@ export interface Comic {
   comicpages: Page[];
 }
 
+export type ComicWithNoPages = Omit<Comic, "comicpages">;
+
 export type QuestionWithNoAnswer = Omit<Question, "answer">;

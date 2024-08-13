@@ -3,6 +3,11 @@ import comicService from "../services/comicService";
 import { Comic } from "../types";
 const router = express.Router();
 
+router.get("/", (_req, res) => {
+  const comicList = comicService.getAllComics();
+  return res.json(comicList);
+});
+
 // Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.
 // palauttaa keyn, joka avaa seuraavat sarjakuvasivut, jos vastaukset ovat oikein.
 // Jos kyseessä on sivu 0 eli etusivu, palauttaa suoraan ensimmäisen tehtäväsivun keyn.
