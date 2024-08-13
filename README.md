@@ -16,14 +16,17 @@ This causes a need to wait for about a minute, when opening the web page. More i
 
 clone the repository: git@github.com:StinaSoile/matikkasarjis-backend.git
 
-install dependencies: npm install
+install dependencies: `npm install`
 
-compile typescript to javascript: tsc
-run compiled code: npm start
+compile typescript to javascript: `tsc`
 
-run in development mode: npm run dev
+run compiled code: `npm start`
+
+run in development mode: `npm run dev`
 
 run tests:
-npm test for all tests,
-npm run test-coverage to see analytics of test coverage,
-npm run test-only to run chosen tests, requiring that you add .only to test suites and tests.
+`npm test` for all tests,
+
+`npm run test-coverage` to see analytics of test coverage,
+
+`npm run test-only` to run chosen tests, requiring that you add `.only` to test suites and tests.
