@@ -4,8 +4,19 @@ import { Comic } from "../types";
 const router = express.Router();
 
 router.get("/", (_req, res) => {
-  const comicList = comicService.getAllComics();
-  return res.json(comicList);
+  comicService
+    .getAllComics()
+    .then((comics) => {
+      console.log(comics);
+      res.json(comics);
+    })
+    .catch((error: unknown) => {
+      let errMsg = "Something went wrong.";
+      if (error instanceof Error) {
+        errMsg = error.message;
+      }
+      return res.status(404).send(errMsg);
+    });
 });
 
 // Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.

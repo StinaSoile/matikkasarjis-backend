@@ -1,7 +1,6 @@
 import express, { Application } from "express";
 import imageRouter from "./routes/images";
 import comicRouter from "./routes/comics";
-
 import cors from "cors";
 
 export const app: Application = express();

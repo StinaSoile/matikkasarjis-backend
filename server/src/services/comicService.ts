@@ -1,10 +1,4 @@
-import {
-  Comic,
-  ComicWithNoPages,
-  Page,
-  PageWithNoAnswer,
-  QuestionWithNoAnswer,
-} from "../types";
+import { Comic, Page, PageWithNoAnswer, QuestionWithNoAnswer } from "../types";
 import { Comics } from "../../data/allComics";
 import {
   stringToNumber,
@@ -14,6 +8,7 @@ import {
   findCurrentKey,
   isFirstPage,
 } from "../utils";
+import ComicModel from "../models/comic";
 
 const getIndexByKey = (key: string, pageList: Page[]): number => {
   return pageList.findIndex((page) => page.key === key);
@@ -98,8 +93,17 @@ const getComic = (name: string): Comic => {
   throw new Error("Comic does not exist");
 };
 
-const getAllComics = (): ComicWithNoPages[] => {
-  return Comics.map(({ shortName, name, level }) => ({
+// const getAllComics = (): ComicWithNoPages[] => {
+//   return Comics.map(({ shortName, name, level }) => ({
+//     shortName,
+//     name,
+//     level,
+//   }));
+// };
+
+const getAllComics = async () => {
+  const comics = await ComicModel.find();
+  return comics.map(({ shortName, name, level }) => ({
     shortName,
     name,
     level,
