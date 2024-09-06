@@ -1,11 +1,116 @@
 import supertest from "supertest";
-import test from "node:test";
+import { test, beforeEach, before, after } from "node:test";
 import { app } from "../app";
 import assert from "node:assert";
 import { Page, PageWithNoAnswer } from "../types";
 import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
+import mongoose from "mongoose";
+import Comic from "../models/comic";
+import comicService from "../services/comicService";
+
+import config from "../utils/config";
 
 const api = supertest(app);
+
+const ComicPages: Page[] = [
+  {
+    pictureName: "etusivu.png",
+  },
+  {
+    pictureName: "s1.png",
+  },
+  {
+    key: "key1",
+    pictureName: "s2.png",
+    questionList: [
+      {
+        question: "Onko?",
+        answer: "kyllä",
+      },
+    ],
+  },
+  {
+    pictureName: "s3.png",
+  },
+  {
+    key: "key2",
+    pictureName: "s2.png",
+    questionList: [
+      {
+        question: "Eikö ole?",
+        answer: "ei",
+      },
+    ],
+  },
+  {
+    key: "key3",
+    pictureName: "s2.png",
+  },
+];
+const ComicPagesnoAnswer: (PageWithNoAnswer | Page)[] = [
+  {
+    pictureName: "etusivu.png",
+  },
+  {
+    pictureName: "s1.png",
+  },
+  {
+    key: "key1",
+    pictureName: "s2.png",
+    questionList: [
+      {
+        question: "Onko?",
+        answer: "kyllä",
+      },
+    ],
+  },
+  {
+    pictureName: "s3.png",
+  },
+  {
+    key: "key2",
+    pictureName: "s2.png",
+    questionList: [
+      {
+        question: "Eikö ole?",
+      },
+    ],
+  },
+];
+
+const SomeComic = {
+  shortName: "somecomic",
+  name: "Some Comic",
+  level: "some level",
+  comicpages: ComicPages,
+};
+const PageWithNoAnswerComic = {
+  shortName: "pagewithnoanswercomic",
+  name: "Some Comic with a page without answer",
+  level: "some level",
+  comicpages: ComicPagesnoAnswer,
+};
+const url = config.MONGODB_URI as string;
+
+before(async () => {
+  await mongoose
+    .connect(url)
+    .then((_result) => {
+      console.log("connected to MongoDB");
+    })
+    .catch((error) => {
+      console.log("error connecting to MongoDB:", error.message);
+    });
+});
+
+beforeEach(async () => {
+  await Comic.deleteMany({});
+  await Comic.insertMany([SomeComic, PageWithNoAnswerComic]);
+});
+
+after(async () => {
+  await mongoose.connection.close();
+});
 
 test.describe("testing get(`api/comics/:comicName`)", () => {
   test("comic pages are returned as json", async () => {
@@ -204,20 +309,38 @@ test.describe("testing get(`api/comics/:comicName/:page`)", () => {
   });
 });
 
-test.describe("testing get(`api/comics`)", () => {
-  test("should return list of comics without pages", async () => {
+test.describe("testing get(`api/comics`)", async () => {
+  await test("should return list of comics without pages", async () => {
     const result = await api.get("/api/comics").expect(200);
 
     assert.deepEqual(result.body, [
       {
-        shortName: "siivetonlepakko",
-        name: "Siivettömän lepakon matka",
-        level: "4. luokka",
+        shortName: "somecomic",
+        name: "Some Comic",
+        level: "some level",
       },
       {
-        shortName: "velhontaloudenhoitaja",
-        name: "Velhon taloudenhoitaja",
-        level: "8. luokka",
+        shortName: "pagewithnoanswercomic",
+        name: "Some Comic with a page without answer",
+        level: "some level",
+      },
+    ]);
+  });
+});
+
+test.describe("testing getAllComics", async () => {
+  await test("should return list of comics but no pages", async () => {
+    const result = await comicService.getAllComics();
+    assert.deepEqual(result, [
+      {
+        shortName: "somecomic",
+        name: "Some Comic",
+        level: "some level",
+      },
+      {
+        shortName: "pagewithnoanswercomic",
+        name: "Some Comic with a page without answer",
+        level: "some level",
       },
     ]);
   });
