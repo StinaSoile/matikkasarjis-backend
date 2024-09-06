@@ -1,4 +1,4 @@
-import { Page } from "./types";
+import { Page, Question } from "./types";
 
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
@@ -69,4 +69,26 @@ export const findCurrentKey = (comic: Page[], page: number) => {
 export const isFirstPage = (page: number) => {
   if (page === 0) return true;
   return false;
+};
+
+export const mapQuestionList = (
+  questionList:
+    | {
+        answer?: string | null | undefined;
+        question?: string | null | undefined;
+      }[]
+    | undefined
+): Question[] | undefined => {
+  if (!questionList || questionList.length < 1) return undefined;
+  const hasUndefined = questionList.some(
+    ({ answer, question }) => answer === undefined || question === undefined
+  );
+
+  if (hasUndefined) {
+    return undefined; // Jos on yksikin undefined, palautetaan undefined koko listalle
+  }
+  return questionList.map(({ answer, question }) => ({
+    answer: answer,
+    question: question,
+  })) as Question[];
 };

@@ -1,5 +1,4 @@
 import { Comic, Page, PageWithNoAnswer, QuestionWithNoAnswer } from "../types";
-import { Comics } from "../../data/allComics";
 import {
   stringToNumber,
   toStringList,
@@ -7,6 +6,7 @@ import {
   findNextKey,
   findCurrentKey,
   isFirstPage,
+  mapQuestionList,
 } from "../utils";
 import ComicModel from "../models/comic";
 
@@ -87,19 +87,28 @@ const getPagesToReturn = (
   return newPages;
 };
 
-const getComic = (name: string): Comic => {
-  const comic = Comics.find((comic) => comic.shortName === name);
-  if (comic) return comic;
+const getComic = async (name: string): Promise<Comic> => {
+  const comic = await ComicModel.findOne({ shortName: name });
+  if (
+    comic &&
+    comic.shortName &&
+    comic.name &&
+    comic.level &&
+    comic.comicpages
+  ) {
+    const comicpages = comic.comicpages.map((page) => {
+      const { key, pictureName, questionList } = page.toObject();
+      const comicPage = { pictureName } as Page;
+      if (key) comicPage.key = key;
+      const questions = mapQuestionList(questionList);
+      if (questions) comicPage.questionList = questions;
+      return comicPage;
+    });
+    const { shortName, name, level } = comic;
+    return { shortName, name, level, comicpages };
+  }
   throw new Error("Comic does not exist");
 };
-
-// const getAllComics = (): ComicWithNoPages[] => {
-//   return Comics.map(({ shortName, name, level }) => ({
-//     shortName,
-//     name,
-//     level,
-//   }));
-// };
 
 const getAllComics = async () => {
   const comics = await ComicModel.find();
