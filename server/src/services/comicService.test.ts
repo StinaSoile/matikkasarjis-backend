@@ -3,7 +3,6 @@ import { test } from "node:test";
 import comicService from "./comicService";
 
 import { Page, PageWithNoAnswer } from "../types";
-import { VelhonTaloudenhoitajaTypedPages } from "../../data/comicData";
 
 const ComicPages: Page[] = [
   {
@@ -277,25 +276,5 @@ test.describe("testing getPagesToReturn", () => {
   });
 });
 
-test.describe("testing getComic", () => {
-  test("should give info of one comic, if comic name exists", () => {
-    const result = comicService.getComic("velhontaloudenhoitaja");
-    assert.deepEqual(result, {
-      shortName: "velhontaloudenhoitaja",
-      name: "Velhon taloudenhoitaja",
-      level: "8. luokka",
-      comicpages: VelhonTaloudenhoitajaTypedPages,
-    });
-  });
-
-  test("should throw error if comic does not exist", () => {
-    const result = () => comicService.getComic("eisarjakuva");
-    assert.throws(result, (err: Error) => {
-      assert.strictEqual(err.message, "Comic does not exist");
-      return true;
-    });
-  });
-});
-
-/* test.describe("testing getAllComics" is in comics.test.ts
+/* tests for getAllComics and getComic are in comics.test.ts
  for it to work: uses database and that can be done only in that specific file for now. */
