@@ -18,7 +18,6 @@ router.get("/", (_req, res) => {
   comicService
     .getAllComics()
     .then((comics) => {
-      console.log(comics);
       res.json(comics);
     })
     .catch((error: unknown) => {
@@ -26,10 +25,6 @@ router.get("/", (_req, res) => {
     });
 });
 
-// Postaa tietyn sarjakuvan tiettyyn sivuun liittyvät vastaukset tämän sivun osoitteeseen.
-// palauttaa keyn, joka avaa seuraavat sarjakuvasivut, jos vastaukset ovat oikein.
-// Jos kyseessä on sivu 0 eli etusivu, palauttaa suoraan ensimmäisen tehtäväsivun keyn.
-// Jos vastaus on väärä, palauttaa keyn, joka vastaa sivua, jonka kysymyksiin tässä yritetään vastata.
 router.post("/:comicName/:page", (req, res) => {
   const postPage = async () => {
     try {
@@ -47,8 +42,6 @@ router.post("/:comicName/:page", (req, res) => {
   postPage();
 });
 
-// Palauttaa sarjakuvan kaikki sivut jotka saa sillä avaimella, joka on getin mukana queryssa
-// Listan viimeinen, ts se jonka key on annettu, palautetaan ilman tietoja oikeista vastauksista.
 router.get("/:comicName", (req, res) => {
   const postComic = async () => {
     try {
@@ -66,7 +59,6 @@ router.get("/:comicName", (req, res) => {
   postComic();
 });
 
-// yksittäiset sivut kysymyksineen ja vastauksineen, rajoitettu keyn perusteella
 router.get("/:comicName/:page", (req, res) => {
   const getPage = async () => {
     try {

@@ -54,7 +54,7 @@ export const checkIfRightAnswer = (
 export const findNextKey = (comic: Page[], page: number): string => {
   for (let i = page + 1; i < comic.length; i++) {
     if (comic[i].key) {
-      return comic[i].key as string; // tässä on oikaistu typescriptin suhteen, ehkä korjaa myöhemmin
+      return comic[i].key as string;
     }
   }
   throw new Error("No keys found");
@@ -85,7 +85,7 @@ export const mapQuestionList = (
   );
 
   if (hasUndefined) {
-    return undefined; // Jos on yksikin undefined, palautetaan undefined koko listalle
+    return undefined;
   }
   return questionList.map(({ answer, question }) => ({
     answer: answer,

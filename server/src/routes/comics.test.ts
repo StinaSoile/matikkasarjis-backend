@@ -326,17 +326,10 @@ test.describe("testing getComic", async () => {
   await test("should throw error if comic does not exist", async () => {
     try {
       await comicService.getComic("eisarjakuva");
-      // Jos edellinen rivi ei heitä virhettä, testi epäonnistuu
       assert.fail("Expected error was not thrown");
     } catch (err: unknown) {
-      // Tarkistetaan, että virhe on instanssi `Error`-luokasta ja viesti on oikea
       assert(err instanceof Error);
       assert.strictEqual(err.message, "Comic does not exist");
     }
-    //   const result = () => comicService.getComic("eisarjakuva");
-    //   assert.throws(result, (err: Error) => {
-    //     assert.strictEqual(err.message, "Comic does not exist");
-    //     return true;
-    //   });
   });
 });
