@@ -1,4 +1,4 @@
-import { Page } from "./types";
+import { Page, Question } from "./types";
 
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
@@ -54,7 +54,7 @@ export const checkIfRightAnswer = (
 export const findNextKey = (comic: Page[], page: number): string => {
   for (let i = page + 1; i < comic.length; i++) {
     if (comic[i].key) {
-      return comic[i].key as string; // tässä on oikaistu typescriptin suhteen, ehkä korjaa myöhemmin
+      return comic[i].key as string;
     }
   }
   throw new Error("No keys found");
@@ -69,4 +69,26 @@ export const findCurrentKey = (comic: Page[], page: number) => {
 export const isFirstPage = (page: number) => {
   if (page === 0) return true;
   return false;
+};
+
+export const mapQuestionList = (
+  questionList:
+    | {
+        answer?: string | null | undefined;
+        question?: string | null | undefined;
+      }[]
+    | undefined
+): Question[] | undefined => {
+  if (!questionList || questionList.length < 1) return undefined;
+  const hasUndefined = questionList.some(
+    ({ answer, question }) => answer === undefined || question === undefined
+  );
+
+  if (hasUndefined) {
+    return undefined;
+  }
+  return questionList.map(({ answer, question }) => ({
+    answer: answer,
+    question: question,
+  })) as Question[];
 };
