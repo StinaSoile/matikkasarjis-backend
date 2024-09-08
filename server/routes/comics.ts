@@ -21,7 +21,6 @@ router.get("/", (_req, res) => {
       res.json(comics);
     })
     .catch((error: unknown) => {
-      console.log("err");
       handleError(error, res);
     });
 });

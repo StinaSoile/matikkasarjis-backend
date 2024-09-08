@@ -7,8 +7,6 @@ import mongoose from "mongoose";
 import Comic from "../models/comic";
 import comicService from "../services/comicService";
 
-import config from "../utils/config";
-
 const api = supertest(app);
 
 const ComicPages: Page[] = [
@@ -89,7 +87,7 @@ const PageWithNoAnswerComic = {
   level: "some level",
   comicpages: ComicPagesnoAnswer,
 };
-const url = config.MONGODB_URI as string;
+const url = process.env.TEST_MONGODB_URI as string;
 
 before(async () => {
   await mongoose

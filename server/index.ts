@@ -5,7 +5,12 @@ mongoose.set("strictQuery", false);
 
 const PORT = 3333;
 
-const url = process.env.MONGODB_URI as string;
+const CHOSEN_MONGODB_URI =
+  process.env.NODE_ENV === "test"
+    ? process.env.TEST_MONGODB_URI
+    : process.env.MONGODB_URI;
+
+const url = CHOSEN_MONGODB_URI as string;
 
 console.log("connecting to MongoDB");
 mongoose
