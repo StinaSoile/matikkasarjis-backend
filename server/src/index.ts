@@ -3,7 +3,7 @@ import config from "./utils/config";
 import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
 
-const PORT = 3000;
+const PORT = 3333;
 
 const url = config.MONGODB_URI as string;
 

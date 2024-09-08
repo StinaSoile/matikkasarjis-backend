@@ -18,9 +18,11 @@ router.get("/", (_req, res) => {
   comicService
     .getAllComics()
     .then((comics) => {
+      console.log("xxxxx");
       res.json(comics);
     })
     .catch((error: unknown) => {
+      console.log("err");
       handleError(error, res);
     });
 });
