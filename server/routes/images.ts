@@ -7,7 +7,7 @@ router.get("/:comicName/:imageName", (req, res) => {
   const imageName = req.params.imageName;
   const imagePath = path.join(
     __dirname,
-    `../../../public/images/${comicName}`,
+    `../../public/images/${comicName}`,
     imageName
   );
 
@@ -20,7 +20,7 @@ router.get("/:comicName/:imageName", (req, res) => {
 
 router.get("/:imageName", (req, res) => {
   const imageName = req.params.imageName;
-  const imagePath = path.join(__dirname, "../../../public/images", imageName);
+  const imagePath = path.join(__dirname, "../../public/images", imageName);
 
   res.sendFile(imagePath, (err) => {
     if (err) {
