@@ -3,7 +3,7 @@ import { app } from "./app";
 import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
 
-const PORT = 3333;
+const PORT = process.env.PORT || 3001;
 
 const CHOSEN_MONGODB_URI =
   process.env.NODE_ENV === "test"
