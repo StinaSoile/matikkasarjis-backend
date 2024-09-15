@@ -6,6 +6,8 @@ import { Page, PageWithNoAnswer } from "../types";
 import mongoose from "mongoose";
 import Comic from "../models/comic";
 import comicService from "../services/comicService";
+import User from "../models/user";
+import bcrypt from "bcrypt";
 
 const api = supertest(app);
 
@@ -312,7 +314,6 @@ test.describe("testing getAllComics", async () => {
 test.describe("testing getComic", async () => {
   await test("should give info of one comic, if comic name exists", async () => {
     const result = await comicService.getComic("somecomic");
-    console.log(result);
     assert.deepEqual(result, {
       shortName: "somecomic",
       name: "Some Comic",
@@ -329,5 +330,100 @@ test.describe("testing getComic", async () => {
       assert(err instanceof Error);
       assert.strictEqual(err.message, "Comic does not exist");
     }
+  });
+});
+
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map((u) => u.toJSON());
+};
+
+test.describe("when there is initially one user at db", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash("sekret", 10);
+    const user = new User({ username: "root", passwordHash, progress: [] });
+
+    await user.save();
+  });
+
+  test("creation succeeds with a fresh username", async () => {
+    const usersAtStart = await usersInDb();
+
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await usersInDb();
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map((u) => u.username);
+    assert(usernames.includes(newUser.username));
+  });
+
+  test("creation fails with proper statuscode and message if username already taken", async () => {
+    const usersAtStart = await usersInDb();
+
+    const newUser = {
+      username: "root",
+      password: "salainen2",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser).expect(400);
+    // .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await usersInDb();
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+  });
+});
+
+test.describe("testing get(`api/images/:comicName/:imageName`)", () => {
+  test("should return image if it exists in the path", async () => {
+    const kuva1 = await api
+      .get("/api/images/siivetonlepakko/lepakko-s1.png")
+      .expect(200);
+    assert.deepEqual(kuva1.headers["content-type"], "image/png");
+
+    const kuva2 = await api
+      .get("/api/images/velhontaloudenhoitaja/velhontaloudenhoitaja-s4.png")
+      .expect(200);
+    assert.deepEqual(kuva2.headers["content-type"], "image/png");
+  });
+
+  test("should throw error if path or image name is wrong", async () => {
+    const result1 = await api
+      .get("/api/images/siivetonrapakko/lepakko-s1.png")
+      .expect(404);
+    assert.strictEqual(result1.text, "Image not found");
+
+    const result2 = await api
+      .get("/api/images/siivetonlepakko/s1.png")
+      .expect(404);
+    assert.strictEqual(result2.text, "Image not found");
+  });
+});
+
+test.describe("testing get(`api/images/:imageName`)", () => {
+  test("should return image if it exists in the path", async () => {
+    const kuva1 = await api.get("/api/images/etusivunkuva.png").expect(200);
+    assert.deepEqual(kuva1.headers["content-type"], "image/png");
+  });
+
+  test("should throw error if path or image name is wrong", async () => {
+    const result1 = await api.get("/api/images/ei").expect(404);
+    assert.strictEqual(result1.text, "Image not found");
+
+    const result2 = await api.get("/api/images/s1.png").expect(404);
+    assert.strictEqual(result2.text, "Image not found");
   });
 });
