@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
-import * as dotenv from "dotenv";
-dotenv.config();
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  passwordHash: String,
+  passwordHash: { type: String, required: true },
   progress: [
     {
       comic: String,
