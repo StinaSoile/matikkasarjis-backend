@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/user";
+import userService from "../services/userService";
 const router = express.Router();
 
 const handleError = (error: unknown, res: express.Response) => {
@@ -15,11 +15,9 @@ const handleError = (error: unknown, res: express.Response) => {
 router.post("/", (req, res) => {
   const createUser = async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { username, password, progress } = req.body;
+      const { username, password, progress } = userService.getUser(req.body);
 
       const saltRounds = 10;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       const user = new User({

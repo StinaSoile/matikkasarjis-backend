@@ -1,4 +1,4 @@
-import { Page, Question } from "./types";
+import { Page, ProgressItem, Question } from "./types";
 
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
@@ -21,7 +21,7 @@ const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
 };
 
-const parseString = (string: unknown): string => {
+export const parseString = (string: unknown): string => {
   if (!string || !isString(string)) {
     throw new Error("Not able to parse to string");
   }
@@ -91,4 +91,19 @@ export const mapQuestionList = (
     answer: answer,
     question: question,
   })) as Question[];
+};
+
+export const isProgressArray = (
+  progress: unknown
+): progress is ProgressItem[] => {
+  return (
+    Array.isArray(progress) &&
+    progress.every(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof item.comic === "string" &&
+        typeof item.key === "string"
+    )
+  );
 };

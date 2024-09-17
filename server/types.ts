@@ -22,6 +22,16 @@ export interface Comic {
   comicpages: Page[];
 }
 
+export interface User {
+  username: string;
+  password: string;
+  progress: ProgressItem[];
+}
+
+export interface ProgressItem {
+  comic: string;
+  key: string;
+}
 export type ComicWithNoPages = Omit<Comic, "comicpages">;
 
 export type QuestionWithNoAnswer = Omit<Question, "answer">;
