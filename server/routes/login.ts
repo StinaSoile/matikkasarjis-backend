@@ -4,17 +4,15 @@ import express from "express";
 const router = express.Router();
 import User from "../models/user";
 import * as dotenv from "dotenv";
+import userService from "../services/userService";
 dotenv.config();
 
 router.post("/", (request, response) => {
   const login = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { username, password } = request.body;
+    const { username, password } = userService.getUser(request.body);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user = await User.findOne({ username });
     const passwordCorrect =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       user === null ? false : bcrypt.compare(password, user.passwordHash);
 
     if (!(user && passwordCorrect)) {
@@ -29,15 +27,13 @@ router.post("/", (request, response) => {
     };
 
     const secret = process.env.SECRET as string;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    const token = jwt.sign(userForToken, secret);
+    const token = jwt.sign(userForToken, secret, {
+      expiresIn: 60 * 60 * 24 * 30,
+    });
 
-    return (
-      response
-        .status(200)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        .send({ token, username: user.username, progress: user.progress })
-    );
+    return response
+      .status(200)
+      .send({ token, username: user.username, progress: user.progress });
   };
   login();
 });
