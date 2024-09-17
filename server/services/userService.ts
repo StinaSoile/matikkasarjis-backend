@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import UserModel from "../models/user";
 import { parseString, isProgressArray } from "../utils";
 import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const getUser = (body: unknown) => {
+const parseUser = (body: unknown) => {
   let user: User;
   if (
     typeof body === "object" &&
@@ -27,7 +30,7 @@ const getUser = (body: unknown) => {
 };
 
 const createUser = async (body: unknown) => {
-  const { username, password, progress } = getUser(body);
+  const { username, password, progress } = parseUser(body);
 
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -48,7 +51,7 @@ const getAllUsers = async () => {
 };
 
 const login = async (body: unknown) => {
-  const { username, password } = getUser(body);
+  const { username, password } = parseUser(body);
 
   const user = await UserModel.findOne({ username });
   const passwordCorrect =
@@ -71,9 +74,22 @@ const login = async (body: unknown) => {
   return { token, username: user.username, progress: user.progress };
 };
 
+const saveProgress = async (request: Express.Request) => {
+  if ("body" in request) {
+    const { username, progress } = parseUser(request.body);
+    const user = await UserModel.findOneAndUpdate(
+      { username },
+      { progress: progress }
+    );
+    return user;
+  }
+  throw new Error("body not found");
+};
+
 export default {
-  getUser,
+  parseUser,
   createUser,
   getAllUsers,
   login,
+  saveProgress,
 };

@@ -26,4 +26,16 @@ router.get("/", (_request, response) => {
   });
 });
 
+//save progress
+// TÄMÄ TARVII HASHIN; EI KÄYTETÄ VIELÄ!
+router.post("/save", (req, res) => {
+  try {
+    userService.saveProgress(req).then((updatedUser) => {
+      res.status(201).json(updatedUser);
+    });
+  } catch (error: unknown) {
+    handleError(error, res);
+  }
+});
+
 export default router;
