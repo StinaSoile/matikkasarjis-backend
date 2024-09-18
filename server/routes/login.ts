@@ -12,13 +12,12 @@ const handleError = (error: unknown, res: express.Response) => {
   return res.status(401).send(errMsg);
 };
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    userService.login(req.body).then((response) => {
-      res.status(200).send(response);
-    });
+    const response = await userService.login(req.body);
+    return res.status(200).send(response);
   } catch (error: unknown) {
-    handleError(error, res);
+    return handleError(error, res);
   }
 });
 
