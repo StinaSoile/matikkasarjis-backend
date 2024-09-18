@@ -1,11 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import UserModel from "../models/user";
 import { parseString, isProgressArray } from "../utils";
 import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Request } from "express";
+const parseToken = (decodedToken: unknown) => {
+  if (
+    typeof decodedToken === "object" &&
+    decodedToken !== null &&
+    "username" in decodedToken &&
+    "id" in decodedToken
+  )
+    return decodedToken;
+  throw new Error("token is not compatible to user");
+};
 
 const parseUser = (body: unknown) => {
   let user: User;
@@ -40,7 +48,6 @@ const createUser = async (body: unknown) => {
     passwordHash,
     progress,
   });
-
   const savedUser = await user.save();
   return savedUser;
 };
@@ -55,10 +62,10 @@ const login = async (body: unknown) => {
 
   const user = await UserModel.findOne({ username });
   const passwordCorrect =
-    user === null ? false : bcrypt.compare(password, user.passwordHash);
+    user === null ? false : await bcrypt.compare(password, user.passwordHash);
 
   if (!(user && passwordCorrect)) {
-    throw new Error("No keys found");
+    throw new Error("Wrong username or password");
   }
 
   const userForToken = {
@@ -74,7 +81,24 @@ const login = async (body: unknown) => {
   return { token, username: user.username, progress: user.progress };
 };
 
-const saveProgress = async (request: Express.Request) => {
+const saveProgress = async (req: Request) => {
+  let authorization = req.get("authorization") as string;
+  if (authorization && authorization.startsWith("Bearer ")) {
+    authorization = authorization.replace("Bearer ", "");
+  }
+  const secret = process.env.SECRET as string;
+  const decodedToken = jwt.verify(authorization, secret);
+  const token = parseToken(decodedToken);
+
+  const user = await UserModel.findById(token.id);
+  if (user && user.username === req.body.username) {
+    const updatedUser = await updateProgress(req);
+    return updatedUser;
+  }
+  throw new Error("invalid body");
+};
+
+const updateProgress = async (request: Express.Request) => {
   if ("body" in request) {
     const { username, progress } = parseUser(request.body);
     const user = await UserModel.findOneAndUpdate(
@@ -91,5 +115,7 @@ export default {
   createUser,
   getAllUsers,
   login,
+  updateProgress,
+  parseToken,
   saveProgress,
 };
