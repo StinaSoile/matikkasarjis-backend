@@ -25,13 +25,16 @@ export interface Comic {
 export interface User {
   username: string;
   password: string;
-  progress: ProgressItem[];
+  progress: {
+    comic: string;
+    key: string;
+  }[];
 }
 
-export interface ProgressItem {
-  comic: string;
-  key: string;
-}
+// export interface ProgressItem {
+//   comic: string;
+//   key: string;
+// }
 export type ComicWithNoPages = Omit<Comic, "comicpages">;
 
 export type QuestionWithNoAnswer = Omit<Question, "answer">;
