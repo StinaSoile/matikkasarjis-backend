@@ -104,6 +104,8 @@ before(async () => {
 
 beforeEach(async () => {
   await Comic.deleteMany({});
+  await User.deleteMany({});
+
   await Comic.insertMany([SomeComic, PageWithNoAnswerComic]);
 });
 
@@ -166,7 +168,7 @@ test.describe("testing get(`api/comics/:comicName`)", () => {
   test("should throw error if key is wrong", async () => {
     const result = await api
       .get("/api/comics/somecomic?key=huonoavain")
-      .expect(400);
+      .expect(404);
 
     assert.strictEqual(result.text, "There is no page with this key");
   });
@@ -225,7 +227,7 @@ test.describe("testing post(`api/comics/:comicName/:page`)", () => {
   });
 
   test("should throw error if page in address does not exist", async () => {
-    await api.post("/api/comics/somecomic/50").send(["13", "32"]).expect(400);
+    await api.post("/api/comics/somecomic/50").send(["13", "32"]).expect(404);
   });
   test("should throw error if comic does not exist", async () => {
     const result = await api.post("/api/comics/eisarjakuva/0").expect(404);
@@ -379,8 +381,7 @@ test.describe("when there is initially one user at db", () => {
       progress: [],
     };
 
-    await api.post("/api/users").send(newUser).expect(400);
-    // .expect("Content-Type", /application\/json/);
+    await api.post("/api/users").send(newUser).expect(409);
 
     const usersAtEnd = await usersInDb();
     assert.strictEqual(usersAtEnd.length, usersAtStart.length);
@@ -422,8 +423,251 @@ test.describe("testing get(`api/images/:imageName`)", () => {
   test("should throw error if path or image name is wrong", async () => {
     const result1 = await api.get("/api/images/ei").expect(404);
     assert.strictEqual(result1.text, "Image not found");
-
     const result2 = await api.get("/api/images/s1.png").expect(404);
     assert.strictEqual(result2.text, "Image not found");
+  });
+});
+
+test.describe(" testing post(`api/login/`)", () => {
+  test("should return error 401 if login with wrong username", async () => {
+    const user = {
+      username: "soikki",
+      password: "salainen",
+      progress: [],
+    };
+
+    const result = await api.post("/api/login").send(user).expect(401);
+    assert.strictEqual(result.text, "Wrong username or password");
+  });
+  test("should return 200 and right form response if login with right user", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    const response = await api.post("/api/login").send(user).expect(200);
+
+    assert.ok(response.body.token, "Response should include a token");
+    assert.strictEqual(response.body.username, "soile");
+    assert.deepStrictEqual(response.body.progress, []);
+
+    // Tarkista, että token on validi JWT-muotoinen (kolme osaa pisteillä erotettuna)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const tokenParts = response.body.token.split(".");
+    assert.strictEqual(
+      tokenParts.length,
+      3,
+      "Token should have 3 parts separated by dots"
+    );
+    // JWT koostuu kolmesta osasta: header, payload ja signature
+  });
+
+  test("should return error 401 if login with wrong password", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salaiton",
+      progress: [],
+    };
+
+    const result = await api.post("/api/login").send(user).expect(401);
+    assert.strictEqual(result.text, "Wrong username or password");
+  });
+});
+
+test.describe(" testing post(`api/users/save`)", () => {
+  test("should return updated user and update database if token and body right", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    const response = await api.post("/api/login").send(user);
+    const token = response.body.token as string;
+
+    const changedUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [
+        { comic: "laalalaa", key: "123" },
+        { comic: "tsirp", key: "tityy" },
+      ],
+    };
+    const response2 = await api
+      .post("/api/users/save")
+      .set("Authorization", `Bearer ${token}`)
+      .send(changedUser);
+
+    assert.strictEqual(response2.statusCode, 200);
+    assert.strictEqual(response2.body.username, "soile");
+    const progressFromResponse = (
+      response2.body.progress as Array<{ comic: string; key: string }>
+    ).map(({ comic, key }) => ({
+      comic,
+      key,
+    }));
+
+    assert.deepStrictEqual(progressFromResponse, changedUser.progress);
+
+    const usersInDB = await usersInDb();
+    const DBuser = usersInDB.find((u) => u.username === "soile");
+    if (!DBuser) {
+      throw new Error("User not found in database");
+    }
+    const progressWithNoId = DBuser.progress.map(({ comic, key }) => ({
+      comic,
+      key,
+    }));
+
+    assert.deepStrictEqual(progressWithNoId, changedUser.progress);
+  });
+
+  test("should return 401 error if token invalid structure", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/login").send(user);
+
+    const changedUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [
+        { comic: "laalalaa", key: "123" },
+        { comic: "tsirp", key: "tityy" },
+      ],
+    };
+    await api
+      .post("/api/users/save")
+      .set("Authorization", `Bearer invalid.token.structure`)
+      .send(changedUser)
+      .expect(401);
+  });
+  test("should return 401 error if token empty", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/login").send(user);
+
+    const changedUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [
+        { comic: "laalalaa", key: "123" },
+        { comic: "tsirp", key: "tityy" },
+      ],
+    };
+    await api
+      .post("/api/users/save")
+      .set("Authorization", `Bearer`)
+      .send(changedUser)
+      .expect(401);
+  });
+  test("should return 401 error if authorization not sent", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/login").send(user);
+
+    const changedUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [
+        { comic: "laalalaa", key: "123" },
+        { comic: "tsirp", key: "tityy" },
+      ],
+    };
+    await api.post("/api/users/save").send(changedUser).expect(401);
+  });
+  test("should return 400 error if token is right form but wrong user", async () => {
+    const newUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/users").send(newUser);
+
+    const user = {
+      username: "soile",
+      password: "salainen",
+      progress: [],
+    };
+
+    await api.post("/api/login").send(user);
+
+    const changedUser = {
+      username: "soile",
+      password: "salainen",
+      progress: [
+        { comic: "laalalaa", key: "123" },
+        { comic: "tsirp", key: "tityy" },
+      ],
+    };
+    await api
+      .post("/api/users/save")
+      .set(
+        "Authorization",
+        `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY2ZTgzYTEzM2Q2YzY4NTQyNjU0YTgzMCIsImlhdCI6MTczNjkzNDMyNCwiZXhwIjoxNzM5NTI2MzI0fQ.cw7W_bVlaiBEgk2mD6AnEcMh_Ol1Ja4H3VrvEnDLbTA`
+      )
+      .send(changedUser)
+      .expect(400);
   });
 });
