@@ -4,15 +4,46 @@ import { User } from "../types";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request } from "express";
+import { BadRequestError, UnauthorizedError } from "../errors";
+
 const parseToken = (decodedToken: unknown) => {
   if (
     typeof decodedToken === "object" &&
     decodedToken !== null &&
     "username" in decodedToken &&
-    "id" in decodedToken
+    "id" in decodedToken &&
+    "iat" in decodedToken &&
+    "exp" in decodedToken
   )
-    return decodedToken;
-  throw new Error("token is not compatible to user");
+    return {
+      username: parseString(decodedToken.username),
+      id: parseString(decodedToken.id),
+      // iat: parseInt(decodedToken.iat),
+      // exp: parseInt(decodedToken.exp),
+    };
+  // return decodedToken;
+  throw new UnauthorizedError("token is not compatible to user");
+};
+
+const parseProgress = (body: unknown) => {
+  let user: User;
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "username" in body &&
+    "progress" in body
+  ) {
+    user = {
+      username: parseString(body.username),
+      password: "",
+      progress: [],
+    };
+    if (body.progress && isProgressArray(body.progress)) {
+      user.progress = body.progress;
+    }
+    return user;
+  }
+  throw new BadRequestError("request has invalid body");
 };
 
 const parseUser = (body: unknown) => {
@@ -21,20 +52,16 @@ const parseUser = (body: unknown) => {
     typeof body === "object" &&
     body !== null &&
     "username" in body &&
-    "password" in body &&
-    "progress" in body
+    "password" in body
   ) {
     user = {
       username: parseString(body.username),
       password: parseString(body.password),
       progress: [],
     };
-    if (body.progress && isProgressArray(body.progress)) {
-      user.progress = body.progress;
-    }
     return user;
   }
-  throw new Error("request has invalid body");
+  throw new BadRequestError("request has invalid body");
 };
 
 const createUser = async (body: unknown) => {
@@ -42,7 +69,12 @@ const createUser = async (body: unknown) => {
 
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
-
+  const otherUser = await UserModel.findOne({ username });
+  if (otherUser) {
+    throw new Error("Username is already in use");
+  }
+  // TODO: tämä ei ole virhe edes, muokkaa
+  // etsi samaniminen user, jos on niin lähetä takaisin virhe
   const user = new UserModel({
     username,
     passwordHash,
@@ -65,7 +97,7 @@ const login = async (body: unknown) => {
     user === null ? false : await bcrypt.compare(password, user.passwordHash);
 
   if (!(user && passwordCorrect)) {
-    throw new Error("Wrong username or password");
+    throw new UnauthorizedError("Wrong username or password");
   }
 
   const userForToken = {
@@ -87,27 +119,46 @@ const saveProgress = async (req: Request) => {
     authorization = authorization.replace("Bearer ", "");
   }
   const secret = process.env.SECRET as string;
-  const decodedToken = jwt.verify(authorization, secret);
+  let decodedToken: unknown;
+  try {
+    decodedToken = jwt.verify(authorization, secret);
+    console.log("Decoded token:", decodedToken);
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      console.error("Token verification failed (JWT error):", error.message);
+      throw new UnauthorizedError("Invalid token");
+    } else if (error instanceof jwt.NotBeforeError) {
+      console.error(
+        "Token verification failed (NotBeforeError):",
+        error.message
+      );
+      throw new UnauthorizedError("Token not active yet");
+    } else if (error instanceof jwt.TokenExpiredError) {
+      console.error(
+        "Token verification failed (TokenExpiredError):",
+        error.message
+      );
+      throw new UnauthorizedError("Token expired");
+    } else {
+      console.error("Unexpected error during token verification:", error);
+      throw new Error("Internal server error");
+    }
+  }
+
   const token = parseToken(decodedToken);
-
-  const user = await UserModel.findById(token.id);
-  if (user && user.username === req.body.username) {
-    const updatedUser = await updateProgress(req);
-    return updatedUser;
+  if (!token.id) {
+    throw new UnauthorizedError("token invalid");
   }
-  throw new Error("invalid body");
-};
-
-const updateProgress = async (request: Express.Request) => {
-  if ("body" in request) {
-    const { username, progress } = parseUser(request.body);
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { progress: progress }
-    );
-    return user;
+  const { progress } = parseProgress(req.body);
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    token.id,
+    { progress: progress },
+    { new: true }
+  );
+  if (!updatedUser) {
+    throw new BadRequestError("invalid body or user not found");
   }
-  throw new Error("body not found");
+  return updatedUser;
 };
 
 export default {
@@ -115,7 +166,6 @@ export default {
   createUser,
   getAllUsers,
   login,
-  updateProgress,
   parseToken,
   saveProgress,
 };

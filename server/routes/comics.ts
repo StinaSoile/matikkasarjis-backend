@@ -2,17 +2,7 @@ import express from "express";
 import comicService from "../services/comicService";
 import { Comic } from "../types";
 const router = express.Router();
-
-const handleError = (error: unknown, res: express.Response) => {
-  let errMsg = "Something went wrong.";
-  if (error instanceof Error) {
-    errMsg = error.message;
-    if (errMsg.includes("Comic does not exist")) {
-      return res.status(404).send(errMsg);
-    }
-  }
-  return res.status(400).send(errMsg);
-};
+import { handleError } from "../utils";
 
 router.get("/", (_req, res) => {
   comicService
