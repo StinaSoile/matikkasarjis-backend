@@ -1,8 +1,10 @@
-import { Page, ProgressItem, Question } from "./types";
+import { BadRequestError, NotFoundError } from "./errors";
+import { Page, Question } from "./types";
+import express from "express";
 
 export const toStringList = (obj: unknown): string[] => {
   if (!Array.isArray(obj)) {
-    throw new Error("Not an array");
+    throw new BadRequestError("Not an array");
   }
   const newObj: string[] = [];
   for (let i = 0; i < obj.length; i++) {
@@ -31,7 +33,7 @@ export const parseString = (string: unknown): string => {
 
 export const returnPageByIndex = (page: number, comic: Page[]) => {
   if (-1 < page && page < comic.length) return comic[page];
-  throw new Error("Page does not exist");
+  throw new NotFoundError("Page does not exist");
 };
 
 export const checkIfRightAnswer = (
@@ -95,7 +97,10 @@ export const mapQuestionList = (
 
 export const isProgressArray = (
   progress: unknown
-): progress is ProgressItem[] => {
+): progress is {
+  comic: string;
+  key: string;
+}[] => {
   return (
     Array.isArray(progress) &&
     progress.every(
@@ -106,4 +111,23 @@ export const isProgressArray = (
         typeof item.key === "string"
     )
   );
+};
+
+export const handleError = (error: unknown, res: express.Response) => {
+  let errMsg = "Something went wrong.";
+  let status = 500;
+  console.log(error);
+  if (error instanceof Error && "statusCode" in error) {
+    status = error.statusCode as number;
+    errMsg = error.message;
+  } else if (error instanceof Error) {
+    console.error("Unexpected error:", error.message);
+    errMsg = "Internal server error";
+    if (error.message === "Username is already in use") status = 409;
+  } else {
+    console.error("Unknown error:", error);
+    errMsg = "Unknown error";
+  }
+
+  return res.status(status).send(errMsg);
 };

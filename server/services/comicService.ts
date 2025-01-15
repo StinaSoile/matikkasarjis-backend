@@ -9,6 +9,7 @@ import {
   mapQuestionList,
 } from "../utils";
 import ComicModel from "../models/comic";
+import { BadRequestError, NotFoundError } from "../errors";
 
 const getIndexByKey = (key: string, pageList: Page[]): number => {
   return pageList.findIndex((page) => page.key === key);
@@ -23,14 +24,14 @@ const getPagesByIndex = (index: number, pageList: Page[]): Page[] => {
 const getPagesByKey = (key: string, pageList: Page[]): Page[] => {
   const index = getIndexByKey(key, pageList);
   if (index > -1) return getPagesByIndex(index, pageList);
-  throw new Error("There is no page with this key");
+  throw new NotFoundError("There is no page with this key");
 };
 
 const getOnePage = (page: string, pageList: (Page | PageWithNoAnswer)[]) => {
   const pagenumber = stringToNumber(page);
   if (pagenumber > -1 && pagenumber < pageList.length)
     return pageList[pagenumber];
-  throw new Error("Index out of bounds");
+  throw new BadRequestError("Index out of bounds");
 };
 
 const returnKeyByAnswer = (
@@ -78,7 +79,7 @@ const getPagesToReturn = (
   comic: Page[]
 ): (Page | PageWithNoAnswer)[] => {
   if (!key) {
-    throw new Error("Key is required");
+    throw new BadRequestError("Key is required");
   }
   const pagesToReturn = getPagesByKey(key, comic);
 
@@ -107,7 +108,7 @@ const getComic = async (name: string): Promise<Comic> => {
     const { shortName, name, level } = comic;
     return { shortName, name, level, comicpages };
   }
-  throw new Error("Comic does not exist");
+  throw new NotFoundError("Comic does not exist");
 };
 
 const getAllComics = async () => {
