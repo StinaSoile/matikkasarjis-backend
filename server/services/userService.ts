@@ -84,7 +84,8 @@ const createUser = async (body: unknown) => {
 
 const getAllUsers = async () => {
   const users = await UserModel.find({});
-  return users;
+  const usernames = users.map((user) => user.username);
+  return usernames;
 };
 
 const login = async (body: unknown) => {
