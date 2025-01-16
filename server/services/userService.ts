@@ -73,8 +73,6 @@ const createUser = async (body: unknown) => {
   if (otherUser) {
     throw new Error("Username is already in use");
   }
-  // TODO: tämä ei ole virhe edes, muokkaa
-  // etsi samaniminen user, jos on niin lähetä takaisin virhe
   const user = new UserModel({
     username,
     passwordHash,
@@ -122,7 +120,6 @@ const saveProgress = async (req: Request) => {
   let decodedToken: unknown;
   try {
     decodedToken = jwt.verify(authorization, secret);
-    console.log("Decoded token:", decodedToken);
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
       console.error("Token verification failed (JWT error):", error.message);
