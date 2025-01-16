@@ -636,7 +636,7 @@ test.describe(" testing post(`api/users/save`)", () => {
     };
     await api.post("/api/users/save").send(changedUser).expect(401);
   });
-  test("should return 400 error if token is right form but wrong user", async () => {
+  test("should return 400 error if token is right form but wrong", async () => {
     const newUser = {
       username: "soile",
       password: "salainen",
@@ -665,9 +665,9 @@ test.describe(" testing post(`api/users/save`)", () => {
       .post("/api/users/save")
       .set(
         "Authorization",
-        `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY2ZTgzYTEzM2Q2YzY4NTQyNjU0YTgzMCIsImlhdCI6MTczNjkzNDMyNCwiZXhwIjoxNzM5NTI2MzI0fQ.cw7W_bVlaiBEgk2mD6AnEcMh_Ol1Ja4H3VrvEnDLbTA`
+        `Bearer eyJhbGciOiJIUzI1QiIsInR5cCI6IrpXVCJ9.eyJ1c2VybmFtZDI6InJvb3QiLCJpZCI6IjY4ZTgzYTEzM2Q2UzY4KTQyNjU0YTgzMNIsImlhdAI6MTcfNjkzPDMyNCwiXXhwIjoxNzM5NTI2MzI0fQ.cw7W_bVloiBEgk2mD6RnEcMh_Ol1Ja4H3VrvEnDLbTA`
       )
       .send(changedUser)
-      .expect(400);
+      .expect(401);
   });
 });
