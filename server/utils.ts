@@ -116,7 +116,6 @@ export const isProgressArray = (
 export const handleError = (error: unknown, res: express.Response) => {
   let errMsg = "Something went wrong.";
   let status = 500;
-  console.log(error);
   if (error instanceof Error && "statusCode" in error) {
     status = error.statusCode as number;
     errMsg = error.message;
