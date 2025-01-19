@@ -7,6 +7,9 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   try {
     const savedUser = await userService.createUser(req.body);
+    if (!savedUser) {
+      return res.status(409).json("Username already in use");
+    }
     return res.status(201).json(savedUser);
   } catch (error: unknown) {
     return handleError(error, res);

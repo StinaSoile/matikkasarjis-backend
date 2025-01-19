@@ -122,7 +122,6 @@ export const handleError = (error: unknown, res: express.Response) => {
   } else if (error instanceof Error) {
     console.error("Unexpected error:", error.message);
     errMsg = "Internal server error";
-    if (error.message === "Username is already in use") status = 409;
   } else {
     console.error("Unknown error:", error);
     errMsg = "Unknown error";
