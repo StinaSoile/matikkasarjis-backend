@@ -71,7 +71,7 @@ const createUser = async (body: unknown) => {
   const passwordHash = await bcrypt.hash(password, saltRounds);
   const otherUser = await UserModel.findOne({ username });
   if (otherUser) {
-    throw new Error("Username is already in use");
+    return null;
   }
   const user = new UserModel({
     username,
